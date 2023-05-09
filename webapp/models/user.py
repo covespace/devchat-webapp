@@ -1,4 +1,6 @@
-# user.py
+"""
+user.py contains the User model.
+"""
 import random
 import re
 from sqlalchemy import Column, String, Integer

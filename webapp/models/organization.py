@@ -1,4 +1,6 @@
-# organization.py
+"""
+organization.py contains the Organization model.
+"""
 import random
 from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship
