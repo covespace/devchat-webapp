@@ -4,7 +4,7 @@ import re
 from sqlalchemy import Column, String, Integer
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
-from webapp.models import organization_user
+from .organization import organization_user
 
 
 class User(Base):
