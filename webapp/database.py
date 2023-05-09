@@ -22,8 +22,3 @@ def create_tables():
 
 def init_db():
     """Initialize the database with some sample data."""
-
-
-if __name__ == "__main__":
-    create_tables()
-    init_db()

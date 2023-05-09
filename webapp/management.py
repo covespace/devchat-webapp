@@ -22,6 +22,8 @@ def create_organization(name: str, country_code: str) -> Organization:
     try:
         session.add(organization)
         session.commit()
+        session.refresh(organization)  # Refresh to get the latest state from the database
+        session.expunge(organization)  # Detach the object from the session
         return organization
     except Exception as exc:
         session.rollback()

@@ -1,8 +1,6 @@
 # organization.py
 from sqlalchemy import Column, String, Float
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from webapp.database import Base
 
 
 class Organization(Base):
