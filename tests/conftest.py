@@ -1,4 +1,6 @@
-# conftest.py
+"""
+conftest.py contains global configurations that are available to all tests.
+"""
 import os
 
 

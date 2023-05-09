@@ -1,3 +1,6 @@
+"""
+utils.py contains utility functions that are used throughout the webapp.
+"""
 import uuid
 
 

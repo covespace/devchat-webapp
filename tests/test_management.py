@@ -1,4 +1,6 @@
-# test_management.py
+"""
+test_management.py contains tests for the functions in management.py.
+"""
 import pytest
 from webapp.database import Base, engine, Session, create_tables
 from webapp.models import Organization

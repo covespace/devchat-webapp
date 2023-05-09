@@ -1,4 +1,6 @@
-# management.py
+"""
+management.py contains functions to create and update data in the database.
+"""
 from webapp.database import Session
 from webapp.models import Organization, User
 
