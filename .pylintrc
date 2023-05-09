@@ -3,10 +3,11 @@ good-names=id,db
 
 [MESSAGES CONTROL]
 disable=
-    missing-docstring,
+    missing-function-docstring,
     broad-exception-caught,
     too-few-public-methods,
     too-many-instance-attributes,
     too-many-arguments,
     too-many-locals,
-    too-many-branches
+    too-many-branches,
+    R0801

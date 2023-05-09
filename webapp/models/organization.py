@@ -1,7 +1,15 @@
 # organization.py
 import random
-from sqlalchemy import Column, String, Float, Integer
+from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
+from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
+
+organization_user = Table(
+    'organization_user',
+    Base.metadata,
+    Column('organization_id', Integer, ForeignKey('organizations.id')),
+    Column('user_id', Integer, ForeignKey('users.id'))
+)
 
 
 class Organization(Base):
@@ -22,12 +30,13 @@ class Organization(Base):
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
     country_code = Column(String, nullable=False)
+    users = relationship("User", secondary=organization_user, back_populates="organizations")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         with Session() as session:
             while True:
-                unique_id = random.randint(100000000, 999999999)
+                unique_id = random.randint(10000000, 99999999)
                 if not session.query(Organization).filter(Organization.id == unique_id).first():
                     self.id = unique_id
                     session.add(self)
