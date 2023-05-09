@@ -1,7 +1,6 @@
 # management.py
 from webapp.database import Session
 from webapp.models import Organization
-from webapp.utils import generate_uuid
 
 
 def create_organization(name: str, country_code: str) -> Organization:
@@ -16,8 +15,7 @@ def create_organization(name: str, country_code: str) -> Organization:
         Organization: The created organization object
     """
     session = Session()
-    organization = Organization(uuid=generate_uuid(name), name=name,
-                                country_code=country_code)
+    organization = Organization(name=name, country_code=country_code)
 
     try:
         session.add(organization)

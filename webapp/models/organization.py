@@ -1,6 +1,7 @@
 # organization.py
-from sqlalchemy import Column, String, Float
-from webapp.database import Base
+import random
+from sqlalchemy import Column, String, Float, Integer
+from webapp.database import Base, Session
 
 
 class Organization(Base):
@@ -8,7 +9,7 @@ class Organization(Base):
     Organization model
 
     Attributes:
-        uuid (str): Unique string identifier for the organization
+        id (int): Unique integer identifier for the organization
         name (str): Name of the organization
         balance (float): Current balance of the organization
         currency (str): Currency of the balance
@@ -16,13 +17,24 @@ class Organization(Base):
     """
     __tablename__ = 'organizations'
 
-    uuid = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True, unique=True)
     name = Column(String, unique=True, nullable=False)
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
     country_code = Column(String, nullable=False)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        with Session() as session:
+            while True:
+                unique_id = random.randint(100000000, 999999999)
+                if not session.query(Organization).filter(Organization.id == unique_id).first():
+                    self.id = unique_id
+                    session.add(self)
+                    session.commit()
+                    break
+
     def __repr__(self):
-        return f"<Organization(uuid='{self.uuid}', name='{self.name}', \
+        return f"<Organization(id={self.id}, name='{self.name}', \
                 balance={self.balance}, currency='{self.currency}', \
                 country_code='{self.country_code}')>"

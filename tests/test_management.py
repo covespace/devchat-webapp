@@ -24,7 +24,7 @@ def test_create_organization_success(setup_database):  # pylint: disable=unused-
     assert organization.currency == "USD"
 
     session = Session()
-    db_organization = session.query(Organization).filter_by(uuid=organization.uuid).first()
+    db_organization = session.query(Organization).filter_by(id=organization.id).first()
     session.close()
 
     assert db_organization is not None
