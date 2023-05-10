@@ -1,0 +1,2 @@
+cryptography==40.0.2
+pytest==7.3.1

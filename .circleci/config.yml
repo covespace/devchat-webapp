@@ -1,0 +1,39 @@
+version: 2.1
+
+jobs:
+  build:
+    docker:
+      - image: python:3.10
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "webapp/requirements.txt" }}-{{ checksum "tests/requirements.txt" }}
+      - run:
+          name: Install dependencies
+          command: |
+            python -m venv venv
+            . venv/bin/activate
+            pip install -r webapp/requirements.txt
+            pip install -r tests/requirements.txt
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "webapp/requirements.txt" }}-{{ checksum "tests/requirements.txt" }}
+      - run:
+          name: Run pylint
+          command: |
+            . venv/bin/activate
+            pylint webapp
+            pylint tests
+      - run:
+          name: Run pytest
+          command: |
+            . venv/bin/activate
+            pytest tests
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
