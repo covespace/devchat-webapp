@@ -5,6 +5,8 @@ import random
 from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
+from .daily_balance import DailyBalance  # pylint: disable=unused-import
+
 
 organization_user = Table(
     'organization_user',
