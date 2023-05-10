@@ -16,6 +16,7 @@ jobs:
             . venv/bin/activate
             pip install -r webapp/requirements.txt
             pip install -r tests/requirements.txt
+            pip install pylint pytest
       - save_cache:
           paths:
             - ./venv

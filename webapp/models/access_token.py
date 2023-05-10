@@ -37,7 +37,9 @@ class AccessToken(Base):
     organization = relationship("Organization", back_populates="access_tokens")
 
     def __init__(self, *args, **kwargs):
-        region = kwargs.pop('region', 'any')  # Extract the 'region' value and remove it from kwargs
+        region = kwargs.pop('region')  # Extract the 'region' value and remove it from kwargs
+        if region is None:
+            region = 'any'
         super().__init__(*args, **kwargs)
         token = generate_access_token(self.user_id, self.organization_id)
         self.token_hash = hash_access_token(token)
