@@ -8,11 +8,11 @@ from cryptography.hazmat.backends import default_backend
 import pytest
 from webapp.database import Base, engine, Session, create_tables
 from webapp.models import Organization
-from webapp.management import create_organization
+from webapp.manage import create_organization
 from webapp.models import User
-from webapp.management import create_user, add_user_to_organization
+from webapp.manage import create_user, add_user_to_organization
 from webapp.models import AccessToken
-from webapp.management import create_access_token, revoke_access_token
+from webapp.manage import create_access_token, revoke_access_token
 
 
 @pytest.fixture(scope="module", autouse=True)
