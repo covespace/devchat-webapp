@@ -17,11 +17,12 @@ def generate_uuid(name: str) -> str:
 
 
 def generate_access_token(user_id: str, organization_id: str) -> str:
-    # Load the RSA private and public keys from environment variables
+    # Load the RSA private key from environment variables
     private_key = os.environ['JWT_PRIVATE_KEY']
     payload = {
         'user_id': user_id,
-        'organization_id': organization_id
+        'organization_id': organization_id,
+        'jti': str(uuid.uuid4())  # Add a unique identifier (UUID) to the payload
     }
     token = jwt.encode(payload, private_key, algorithm='RS256')
     return token
@@ -32,7 +33,7 @@ def hash_access_token(token: str) -> str:
 
 
 def verify_access_token(token: str) -> Tuple[str, str]:
-    # Load the RSA private and public keys from environment variables
+    # Load the RSA public key from environment variables
     public_key = os.environ['JWT_PUBLIC_KEY']
     try:
         payload = jwt.decode(token, public_key, algorithms=['RS256'])
