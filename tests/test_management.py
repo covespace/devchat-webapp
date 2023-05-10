@@ -12,7 +12,7 @@ from webapp.management import create_organization
 from webapp.models import User
 from webapp.management import create_user, add_user_to_organization
 from webapp.models import AccessToken
-from webapp.management import create_token, revoke_token
+from webapp.management import create_access_token, revoke_access_token
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -152,7 +152,7 @@ def test_create_token_success(setup_database):  # pylint: disable=unused-argumen
 
     token_name = "Test Token"
     region = "US"
-    token = create_token(user.id, organization.id, token_name, region)
+    token = create_access_token(user.id, organization.id, token_name, region)
 
     assert token.user_id == user.id
     assert token.organization_id == organization.id
@@ -183,7 +183,7 @@ def test_create_token_invalid_region(setup_database):  # pylint: disable=unused-
     invalid_region = "USA123"
 
     with pytest.raises(ValueError):
-        create_token(user.id, organization.id, token_name, invalid_region)
+        create_access_token(user.id, organization.id, token_name, invalid_region)
 
 
 def test_revoke_token_success(setup_database):  # pylint: disable=unused-argument
@@ -197,9 +197,9 @@ def test_revoke_token_success(setup_database):  # pylint: disable=unused-argumen
 
     token_name = "Test Token"
     region = "US"
-    token = create_token(user.id, organization.id, token_name, region)
+    token = create_access_token(user.id, organization.id, token_name, region)
 
-    result = revoke_token(token.id)
+    result = revoke_access_token(token.id)
 
     assert result is True
 
@@ -212,5 +212,5 @@ def test_revoke_token_success(setup_database):  # pylint: disable=unused-argumen
 
 
 def test_revoke_token_invalid_id(setup_database):  # pylint: disable=unused-argument
-    result = revoke_token(999)
+    result = revoke_access_token(999)
     assert result is False

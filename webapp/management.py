@@ -95,7 +95,8 @@ def add_user_to_organization(user_id: int, organization_id: int) -> bool:
         return False
 
 
-def create_token(user_id: int, organization_id: int, name: str, region: str = None) -> AccessToken:
+def create_access_token(user_id: int, organization_id: int,
+                        name: str, region: str = None) -> AccessToken:
     """
     Create a new access token for a user.
 
@@ -128,7 +129,7 @@ def create_token(user_id: int, organization_id: int, name: str, region: str = No
         session.close()
 
 
-def revoke_token(token_id: int) -> bool:
+def revoke_access_token(token_id: int) -> bool:
     """
     Revoke an access token by setting its revoke_time.
 

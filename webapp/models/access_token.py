@@ -45,6 +45,6 @@ class AccessToken(Base):
 
     def __repr__(self):
         return f"<AccessToken(id={self.id}, name='{self.name}', \
-                token='{self.token}', prefix='{self.prefix}', \
+                token_hash='{self.token_hash}', prefix='{self.prefix}', \
                 create_time='{self.create_time}', revoke_time='{self.revoke_time}', \
                 user_id={self.user_id}, organization_id={self.organization_id})>"

@@ -1,10 +1,13 @@
 """
 test_query.py contains tests for the query.py module.
 """
+import datetime
 import pytest
 from webapp.database import Base, engine, create_tables
 from webapp.management import create_organization, create_user, add_user_to_organization
 from webapp.query import get_users_of_organization
+from webapp.management import create_access_token, revoke_access_token
+from webapp.query import get_valid_tokens_of_organization, get_revoked_token_hashes
 
 
 @pytest.fixture(scope="function", name="setup_database")
@@ -61,3 +64,60 @@ def test_get_users_of_organization_custom_columns(setup_database):  # pylint: di
 def test_get_users_of_organization_invalid_id(setup_database):  # pylint: disable=unused-argument
     users = get_users_of_organization(999)
     assert users == []
+
+
+def test_get_valid_tokens_of_organization_success(setup_database):  # pylint: disable=W0613
+    org_name = "Test Organization"
+    country_code = "USA"
+    organization = create_organization(org_name, country_code)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(username, email)
+
+    add_user_to_organization(user.id, organization.id)
+
+    token1 = create_access_token(user.id, organization.id, "token1")
+    token2 = create_access_token(user.id, organization.id, "token2")
+
+    valid_tokens = get_valid_tokens_of_organization(organization.id)
+    valid_hashes = [token.token_hash for token in valid_tokens]
+
+    assert len(valid_tokens) == 2
+    assert token1.token_hash in valid_hashes
+    assert token2.token_hash in valid_hashes
+
+
+def test_get_revoked_tokens_in_time_range_success(setup_database):  # pylint: disable=W0613
+    org_name = "Test Organization"
+    country_code = "USA"
+    organization = create_organization(org_name, country_code)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(username, email)
+
+    add_user_to_organization(user.id, organization.id)
+
+    token1 = create_access_token(user.id, organization.id, 'token1')
+    token2 = create_access_token(user.id, organization.id, 'token2')
+
+    revoke_access_token(token1.id)
+
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+
+    revoked_hashes = get_revoked_token_hashes(start_time, end_time)
+
+    assert len(revoked_hashes) == 1
+    assert token1.token_hash in revoked_hashes
+    assert token2.token_hash not in revoked_hashes
+
+
+def test_get_revoked_tokens_in_time_range_no_tokens(setup_database):  # pylint: disable=W0613
+    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+
+    revoked_tokens = get_revoked_token_hashes(start_time, end_time)
+
+    assert revoked_tokens == []
