@@ -1,8 +1,10 @@
 """
 management.py contains functions to create and update data in the database.
 """
+import datetime
 from webapp.database import Session
 from webapp.models import Organization, User
+from webapp.models import AccessToken
 
 
 def create_organization(name: str, country_code: str) -> Organization:
@@ -81,6 +83,66 @@ def add_user_to_organization(user_id: int, organization_id: int) -> bool:
 
     if user and organization:
         organization.users.append(user)
+        try:
+            session.commit()
+            return True
+        except Exception as exc:
+            session.rollback()
+            raise exc
+        finally:
+            session.close()
+    else:
+        return False
+
+
+def create_token(user_id: int, organization_id: int, name: str, region: str = None) -> AccessToken:
+    """
+    Create a new access token for a user.
+
+    Args:
+        user_id (int): Unique ID of the user
+        organization_id (int): Unique ID of the organization
+        name (str): Name of the token
+        region (str, optional): Region of the target service as the prefix of a token
+
+    Returns:
+        AccessToken: The created access token object
+    """
+    if region is not None:
+        if len(region) < 2 or len(region) > 4:
+            raise ValueError("Region must be 2 to 4 characters.")
+
+    session = Session()
+    token = AccessToken(user_id=user_id, organization_id=organization_id, name=name, region=region)
+
+    try:
+        session.add(token)
+        session.commit()
+        session.refresh(token)  # Refresh to get the latest state from the database
+        session.expunge(token)  # Detach the object from the session
+        return token
+    except Exception as exc:
+        session.rollback()
+        raise exc
+    finally:
+        session.close()
+
+
+def revoke_token(token_id: int) -> bool:
+    """
+    Revoke an access token by setting its revoke_time.
+
+    Args:
+        token_id (int): Unique ID of the access token
+
+    Returns:
+        bool: True if the token was revoked successfully, False otherwise
+    """
+    session = Session()
+    token = session.query(AccessToken).filter(AccessToken.id == token_id).first()
+
+    if token:
+        token.revoke_time = datetime.datetime.utcnow()
         try:
             session.commit()
             return True

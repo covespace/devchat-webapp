@@ -2,17 +2,10 @@
 access_token.py contains the AccessToken model.
 """
 import datetime
-import hashlib
-import os
-import jwt
 from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base
-
-
-# Load the RSA private and public keys from environment variables
-PUBLIC_KEY = os.environ['JWT_PUBLIC_KEY']
-PRIVATE_KEY = os.environ['JWT_PRIVATE_KEY']
+from webapp.utils import generate_access_token, hash_access_token
 
 
 class AccessToken(Base):
@@ -23,7 +16,7 @@ class AccessToken(Base):
         id (int): Unique auto-increment integer identifier for the token
         name (str): Name of the token
         token_hash (str): Hash of the token for storage and comparison
-        prefix (str): Prefix for the token based on the target service location
+        prefix (str): Prefix for the token based on the target service region
         create_time (datetime): Time when the token was created
         revoke_time (datetime): Time when the token was revoked
         user_id (int): Foreign key for the user associated with the token
@@ -40,37 +33,15 @@ class AccessToken(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     organization_id = Column(Integer, ForeignKey('organizations.id'))
 
-    user = relationship("User", back_populates="app_tokens")
-    organization = relationship("Organization", back_populates="app_tokens")
+    user = relationship("User", back_populates="access_tokens")
+    organization = relationship("Organization", back_populates="access_tokens")
 
     def __init__(self, *args, **kwargs):
+        region = kwargs.pop('region', 'any')  # Extract the 'region' value and remove it from kwargs
         super().__init__(*args, **kwargs)
-        token = self.generate_token(self.user_id, self.organization_id)
-        self.token_hash = self.hash_token(token)
-        self.prefix = f"dc-{kwargs.get('location', 'xyz')}-" + token[:4]
-
-    @classmethod
-    def generate_token(cls, user_id, organization_id):
-        payload = {
-            'user_id': user_id,
-            'organization_id': organization_id
-        }
-        token = jwt.encode(payload, PRIVATE_KEY, algorithm='RS256')
-        return token
-
-    @staticmethod
-    def hash_token(token):
-        return hashlib.sha256(token.encode()).hexdigest()
-
-    @classmethod
-    def verify_token(cls, token):
-        try:
-            payload = jwt.decode(token, PUBLIC_KEY, algorithms=['RS256'])
-            return payload['user_id'], payload['organization_id']
-        except jwt.ExpiredSignatureError:
-            return None
-        except jwt.InvalidTokenError:
-            return None
+        token = generate_access_token(self.user_id, self.organization_id)
+        self.token_hash = hash_access_token(token)
+        self.prefix = f"dc-{region}-" + token[:4]
 
     def __repr__(self):
         return f"<AccessToken(id={self.id}, name='{self.name}', \
