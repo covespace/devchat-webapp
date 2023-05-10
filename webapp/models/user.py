@@ -1,4 +1,6 @@
-# user.py
+"""
+user.py contains the User model.
+"""
 import random
 import re
 from sqlalchemy import Column, String, Integer
@@ -29,6 +31,7 @@ class User(Base):
     social_profile = Column(String, nullable=True)
     organizations = relationship("Organization",
                                  secondary=organization_user, back_populates="users")
+    access_tokens = relationship("AccessToken", back_populates="user")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

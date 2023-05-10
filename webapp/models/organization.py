@@ -1,4 +1,6 @@
-# organization.py
+"""
+organization.py contains the Organization model.
+"""
 import random
 from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship
@@ -31,6 +33,7 @@ class Organization(Base):
     currency = Column(String, nullable=False, default='USD')
     country_code = Column(String, nullable=False)
     users = relationship("User", secondary=organization_user, back_populates="organizations")
+    access_tokens = relationship("AccessToken", back_populates="organization")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
