@@ -32,8 +32,10 @@ class Organization(Base):
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
     country_code = Column(String, nullable=False)
+
     users = relationship("User", secondary=organization_user, back_populates="organizations")
     access_tokens = relationship("AccessToken", back_populates="organization")
+    daily_balances = relationship("DailyBalance", back_populates="organization")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
