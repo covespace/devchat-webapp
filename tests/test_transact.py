@@ -5,7 +5,7 @@ import pytest
 from webapp.database import Base, Session, engine, create_tables
 from webapp.models import Transaction
 from webapp.manage import create_organization, create_user
-from webapp.transact import add_transactions_batch, calculate_daily_balances
+from webapp.transact import add_transactions_batch, calculate_balances
 
 
 @pytest.fixture(scope="function", name="setup_database")
@@ -67,7 +67,7 @@ def test_add_transactions_batch_invalid_transactions(setup_database):  # pylint:
     assert len(db_transactions) == 0
 
 
-def test_calculate_daily_balances(setup_database):  # pylint: disable=W0613
+def test_calculate_balances(setup_database):  # pylint: disable=W0613
     # Create two organizations
     org1 = create_organization("Org1", "USA")
     org2 = create_organization("Org2", "USA")
@@ -91,14 +91,14 @@ def test_calculate_daily_balances(setup_database):  # pylint: disable=W0613
     add_transactions_batch(transactions_org1)
     add_transactions_batch(transactions_org2)
 
-    # Calculate daily balances
-    daily_balances = calculate_daily_balances()
+    # Calculate balances
+    balances = calculate_balances()
 
-    # Check if the daily balances are calculated correctly
-    assert len(daily_balances) == 2
+    # Check if the balances are calculated correctly
+    assert len(balances) == 2
 
-    org1_balance = next(balance for org_id, balance in daily_balances if org_id == org1.id)
-    org2_balance = next(balance for org_id, balance in daily_balances if org_id == org2.id)
+    org1_balance = next(balance for org_id, balance in balances if org_id == org1.id)
+    org2_balance = next(balance for org_id, balance in balances if org_id == org2.id)
 
     assert org1_balance == -0.25
     assert org2_balance == -0.45

@@ -6,7 +6,7 @@ from .organization import organization_user
 from .user import User
 from .access_token import AccessToken
 from .transaction import Transaction
-from .daily_balance import DailyBalance
+from .balance import Balance
 
 __all__ = [
     'Organization',
@@ -14,5 +14,5 @@ __all__ = [
     'User',
     'AccessToken',
     'Transaction',
-    'DailyBalance'
+    'Balance'
 ]

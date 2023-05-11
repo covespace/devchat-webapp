@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 from sqlalchemy import and_, func
 from webapp.database import Session
-from webapp.models import Organization, Transaction, DailyBalance
+from webapp.models import Organization, Transaction, Balance
 
 
 def add_transactions_batch(transactions: List[Transaction]) -> bool:
@@ -31,34 +31,34 @@ def add_transactions_batch(transactions: List[Transaction]) -> bool:
         session.close()
 
 
-def calculate_daily_balances(organization_ids=None):
+def calculate_balances(organization_ids=None):
     session = Session()
 
     if organization_ids is None:
         organization_ids = [org.id for org in session.query(Organization.id).all()]
 
-    last_daily_balances = session.query(
-        DailyBalance.organization_id,
-        DailyBalance.timestamp,
-        DailyBalance.balance
+    last_balances = session.query(
+        Balance.organization_id,
+        Balance.timestamp,
+        Balance.balance
     ).filter(
         and_(
-            DailyBalance.id.in_(
-                session.query(func.max(DailyBalance.id)).  # pylint: disable=E1102
-                group_by(DailyBalance.organization_id)
+            Balance.id.in_(
+                session.query(func.max(Balance.id)).  # pylint: disable=E1102
+                group_by(Balance.organization_id)
             ),
-            DailyBalance.organization_id.in_(organization_ids)
+            Balance.organization_id.in_(organization_ids)
         )
     ).all()
 
-    daily_balances = []
+    balances = []
 
-    # Get a single timestamp for all daily balances
+    # Get a single timestamp for all balances
     current_time = datetime.utcnow()
 
     # Store organization IDs in a dictionary
     org_id_dict = {org_id: (None, 0) for org_id in organization_ids}
-    for org_id, last_time, last_balance in last_daily_balances:
+    for org_id, last_time, last_balance in last_balances:
         org_id_dict[org_id] = (last_time, last_balance)
 
     for org_id, (last_time, last_balance) in org_id_dict.items():
@@ -74,15 +74,15 @@ def calculate_daily_balances(organization_ids=None):
 
         new_balance = last_balance - cost_sum
 
-        daily_balance = DailyBalance(organization_id=org_id, timestamp=current_time,
-                                     prompt_token_sum=prompt_token_sum,
-                                     completion_token_sum=completion_token_sum,
-                                     balance=new_balance)
+        balance = Balance(organization_id=org_id, timestamp=current_time,
+                          prompt_token_sum=prompt_token_sum,
+                          completion_token_sum=completion_token_sum,
+                          balance=new_balance)
 
-        session.add(daily_balance)
-        daily_balances.append((org_id, new_balance))
+        session.add(balance)
+        balances.append((org_id, new_balance))
 
     session.commit()
     session.close()
 
-    return daily_balances
+    return balances
