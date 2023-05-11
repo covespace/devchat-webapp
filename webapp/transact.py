@@ -44,7 +44,8 @@ def calculate_daily_balances(organization_ids=None):
     ).filter(
         and_(
             DailyBalance.id.in_(
-                session.query(func.max(DailyBalance.id)).group_by(DailyBalance.organization_id)
+                session.query(func.max(DailyBalance.id)).  # pylint: disable=E1102
+                group_by(DailyBalance.organization_id)
             ),
             DailyBalance.organization_id.in_(organization_ids)
         )
