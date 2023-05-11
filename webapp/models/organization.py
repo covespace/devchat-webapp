@@ -5,6 +5,8 @@ import random
 from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
+from .balance import Balance  # pylint: disable=unused-import
+
 
 organization_user = Table(
     'organization_user',
@@ -32,8 +34,10 @@ class Organization(Base):
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
     country_code = Column(String, nullable=False)
+
     users = relationship("User", secondary=organization_user, back_populates="organizations")
     access_tokens = relationship("AccessToken", back_populates="organization")
+    balances = relationship("Balance", back_populates="organization")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

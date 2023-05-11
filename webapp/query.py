@@ -45,10 +45,9 @@ def get_valid_tokens_of_organization(organization_id: int) -> List[AccessToken]:
         list: List of AccessToken objects containing valid tokens' information.
     """
     session = Session()
-    valid_tokens = session.query(AccessToken).\
-        join(Organization).\
-        filter(Organization.id == organization_id,
-               AccessToken.revoke_time == None).all()  # pylint: disable=C0121
+    valid_tokens = session.query(AccessToken).join(Organization).filter(
+        Organization.id == organization_id,
+        AccessToken.revoke_time == None).all()  # pylint: disable=C0121
 
     session.close()
     return valid_tokens
