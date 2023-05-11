@@ -1,7 +1,6 @@
 """
 daily_balance.py contains the DailyBalance model.
 """
-from datetime import datetime
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from webapp.database import Base
@@ -22,7 +21,7 @@ class DailyBalance(Base):
     __tablename__ = 'daily_balances'
 
     id = Column(Integer, primary_key=True, unique=True)
-    date = Column(DateTime, nullable=False, default=datetime.utcnow)
+    timestamp = Column(DateTime, nullable=False)
     organization_id = Column(Integer, ForeignKey('organizations.id'))
     prompt_token_sum = Column(Integer, nullable=False)
     completion_token_sum = Column(Integer, nullable=False)
@@ -31,7 +30,7 @@ class DailyBalance(Base):
     organization = relationship("Organization", back_populates="daily_balances")
 
     def __repr__(self):
-        return f"<DailyBalance(id={self.id}, date='{self.date}', \
+        return f"<DailyBalance(id={self.id}, timestamp='{self.timestamp}', \
                 organization_id={self.organization_id}, \
                 prompt_token_sum={self.prompt_token_sum}, \
                 completion_token_sum={self.completion_token_sum}, \

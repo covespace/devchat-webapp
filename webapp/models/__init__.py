@@ -6,11 +6,13 @@ from .organization import organization_user
 from .user import User
 from .access_token import AccessToken
 from .transaction import Transaction
+from .daily_balance import DailyBalance
 
 __all__ = [
     'Organization',
     'organization_user',
     'User',
     'AccessToken',
-    'Transaction'
-    ]
+    'Transaction',
+    'DailyBalance'
+]
