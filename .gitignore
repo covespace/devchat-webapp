@@ -160,5 +160,4 @@ cython_debug/
 #.idea/
 
 # DevChat
-.chat/prompts.graphml
-.chat/prompts.db
+.chat
