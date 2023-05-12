@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 from sqlalchemy import and_, func
 from webapp.database import Session
-from webapp.models import Organization, Transaction, Balance
+from webapp.models import Organization, Transaction, Balance, Payment
 
 
 def add_transactions_batch(transactions: List[Transaction]) -> bool:
@@ -68,11 +68,18 @@ def calculate_balances(organization_ids=None):
             Transaction.timestamp <= current_time
         ).all()
 
+        payments = session.query(Payment).filter(
+            Payment.organization_id == org_id,
+            Payment.timestamp > (last_time if last_time else datetime.min),
+            Payment.timestamp <= current_time
+        ).all()
+
         prompt_token_sum = sum(transaction.prompt_tokens for transaction in transactions)
         completion_token_sum = sum(transaction.completion_tokens for transaction in transactions)
         cost_sum = sum(transaction.price for transaction in transactions)
+        payment_sum = sum(payment.amount for payment in payments)
 
-        new_balance = last_balance - cost_sum
+        new_balance = last_balance - cost_sum + payment_sum
 
         balance = Balance(organization_id=org_id, timestamp=current_time,
                           prompt_token_sum=prompt_token_sum,
