@@ -6,6 +6,7 @@ from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
 from .balance import Balance  # pylint: disable=unused-import
+from .payment import Payment  # pylint: disable=unused-import
 
 
 organization_user = Table(
@@ -38,6 +39,7 @@ class Organization(Base):
     users = relationship("User", secondary=organization_user, back_populates="organizations")
     access_tokens = relationship("AccessToken", back_populates="organization")
     balances = relationship("Balance", back_populates="organization")
+    payments = relationship("Payment", back_populates="organization")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
