@@ -1,7 +1,8 @@
-from datetime import datetime
-from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy import Integer, Float, String, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base
+from webapp.utils import current_timestamp
 
 
 class Payment(Base):
@@ -21,7 +22,7 @@ class Payment(Base):
     organization_id = Column(Integer, ForeignKey('organizations.id'))
     amount = Column(Float, nullable=False)
     currency = Column(String, nullable=False, default='USD')
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
+    timestamp = Column(DateTime, nullable=False, default=current_timestamp())
 
     organization = relationship("Organization", back_populates="payments")
 

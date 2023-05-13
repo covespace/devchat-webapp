@@ -1,10 +1,10 @@
 """
 management.py contains functions to create and update data in the database.
 """
-import datetime
 from webapp.database import Session
 from webapp.models import Organization, User
 from webapp.models import AccessToken
+from webapp.utils import current_timestamp
 
 
 def create_organization(name: str, country_code: str) -> Organization:
@@ -143,7 +143,7 @@ def revoke_access_token(token_id: int) -> bool:
     token = session.query(AccessToken).filter(AccessToken.id == token_id).first()
 
     if token:
-        token.revoke_time = datetime.datetime.utcnow()
+        token.revoke_time = current_timestamp()
         try:
             session.commit()
             return True

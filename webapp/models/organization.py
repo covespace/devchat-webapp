@@ -2,9 +2,11 @@
 organization.py contains the Organization model.
 """
 import random
-from sqlalchemy import Column, String, Float, Integer, ForeignKey, Table
+from sqlalchemy import Column, ForeignKey, Table
+from sqlalchemy import String, Float, Integer, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
+from webapp.utils import current_timestamp
 from .balance import Balance  # pylint: disable=unused-import
 from .payment import Payment  # pylint: disable=unused-import
 
@@ -27,6 +29,7 @@ class Organization(Base):
         balance (float): Current balance of the organization
         currency (str): Currency of the balance
         country_code (str): Location of the organization
+        create_time (DateTime): Time when the organization was created
     """
     __tablename__ = 'organizations'
 
@@ -35,6 +38,7 @@ class Organization(Base):
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
     country_code = Column(String, nullable=False)
+    create_time = Column(DateTime, nullable=False, default=current_timestamp())
 
     users = relationship("User", secondary=organization_user, back_populates="organizations")
     access_tokens = relationship("AccessToken", back_populates="organization")

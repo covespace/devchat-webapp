@@ -3,9 +3,10 @@ user.py contains the User model.
 """
 import random
 import re
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
+from webapp.utils import current_timestamp
 from .organization import organization_user
 
 
@@ -20,6 +21,7 @@ class User(Base):
         company (str): Company the user is associated with
         location (str): Location of the user
         social_profile (str): Link to the user's social profile
+        create_time (DateTime): Time when the user was created
     """
     __tablename__ = 'users'
 
@@ -29,6 +31,8 @@ class User(Base):
     company = Column(String, nullable=True)
     location = Column(String, nullable=True)
     social_profile = Column(String, nullable=True)
+    create_time = Column(DateTime, nullable=False, default=current_timestamp())
+
     organizations = relationship("Organization",
                                  secondary=organization_user, back_populates="users")
     access_tokens = relationship("AccessToken", back_populates="user")

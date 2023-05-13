@@ -1,6 +1,7 @@
 """
 utils.py contains utility functions that are used throughout the webapp.
 """
+from datetime import datetime, timezone
 import hashlib
 import os
 from typing import Tuple
@@ -42,3 +43,7 @@ def verify_access_token(token: str) -> Tuple[str, str]:
         return None
     except jwt.InvalidTokenError:
         return None
+
+
+def current_timestamp() -> datetime:
+    return datetime.now(timezone.utc)

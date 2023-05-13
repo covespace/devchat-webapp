@@ -8,6 +8,7 @@ from webapp.manage import create_organization, create_user, add_user_to_organiza
 from webapp.query import get_users_of_organization
 from webapp.manage import create_access_token, revoke_access_token
 from webapp.query import get_valid_tokens_of_organization, get_revoked_token_hashes
+from webapp.utils import current_timestamp
 
 
 @pytest.fixture(scope="function", name="setup_database")
@@ -104,8 +105,8 @@ def test_get_revoked_tokens_in_time_range_success(setup_database):  # pylint: di
 
     revoke_access_token(token1.id)
 
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    start_time = current_timestamp() - datetime.timedelta(hours=1)
+    end_time = current_timestamp() + datetime.timedelta(hours=1)
 
     revoked_hashes = get_revoked_token_hashes(start_time, end_time)
 
@@ -115,8 +116,8 @@ def test_get_revoked_tokens_in_time_range_success(setup_database):  # pylint: di
 
 
 def test_get_revoked_tokens_in_time_range_no_tokens(setup_database):  # pylint: disable=W0613
-    start_time = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
-    end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    start_time = current_timestamp() - datetime.timedelta(hours=1)
+    end_time = current_timestamp() + datetime.timedelta(hours=1)
 
     revoked_tokens = get_revoked_token_hashes(start_time, end_time)
 

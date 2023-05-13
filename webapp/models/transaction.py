@@ -1,9 +1,9 @@
 """
 transaction.py contains the Transaction model.
 """
-from datetime import datetime
 from sqlalchemy import Column, Integer, Float, DateTime
 from webapp.database import Base
+from webapp.utils import current_timestamp
 
 
 class Transaction(Base):
@@ -27,7 +27,7 @@ class Transaction(Base):
     prompt_tokens = Column(Integer, nullable=False)
     completion_tokens = Column(Integer, nullable=False)
     price = Column(Float, nullable=False)
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
+    timestamp = Column(DateTime, nullable=False, default=current_timestamp())
 
     def __repr__(self):
         return f"<Transaction(id={self.id}, \

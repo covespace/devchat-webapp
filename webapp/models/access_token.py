@@ -1,11 +1,12 @@
 """
 access_token.py contains the AccessToken model.
 """
-import datetime
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy import String, Integer, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base
 from webapp.utils import generate_access_token, hash_access_token
+from webapp.utils import current_timestamp
 
 
 class AccessToken(Base):
@@ -28,7 +29,7 @@ class AccessToken(Base):
     name = Column(String, nullable=True)
     token_hash = Column(String, nullable=False)
     prefix = Column(String, nullable=False)
-    create_time = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
+    create_time = Column(DateTime, nullable=False, default=current_timestamp())
     revoke_time = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'))
     organization_id = Column(Integer, ForeignKey('organizations.id'))
