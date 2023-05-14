@@ -3,7 +3,7 @@ transaction.py contains the Transaction model.
 """
 from sqlalchemy import Column, BigInteger, Float, DateTime
 from sqlalchemy.sql.expression import func
-from webapp.controller import Base
+from .database import Base
 
 
 class Transaction(Base):
