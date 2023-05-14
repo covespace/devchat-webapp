@@ -4,7 +4,7 @@ test_transact.py contains tests for the transact.py module.
 from datetime import timedelta
 import time
 import pytest
-from webapp.models import Transaction, Payment
+from webapp.model import Transaction, Payment
 from webapp.manage import create_organization, create_user
 from webapp.transact import add_transactions_batch, calculate_balances
 from webapp.utils import now

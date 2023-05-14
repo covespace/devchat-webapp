@@ -4,8 +4,8 @@ query.py contains functions to query the database.
 from datetime import datetime
 from typing import List
 from webapp.database import Session
-from webapp.models import Organization, User, organization_user
-from webapp.models import AccessKey
+from webapp.model import Organization, User, organization_user
+from webapp.model import AccessKey
 
 
 def get_users_of_organization(db: Session, organization_id: int,
