@@ -9,7 +9,7 @@ from webapp.models import Organization, Transaction, Balance, Payment
 from webapp.utils import current_timestamp
 
 
-def add_transactions_batch(transactions: List[Transaction]) -> bool:
+def add_transactions_batch(db: Session, transactions: List[Transaction]) -> bool:
     """
     Add a batch of transactions to the transactions table.
 
@@ -19,33 +19,28 @@ def add_transactions_batch(transactions: List[Transaction]) -> bool:
     Returns:
         bool: True if the transactions were added successfully, False otherwise.
     """
-    session = Session()
     try:
-        session.add_all(transactions)
-        session.commit()
+        db.add_all(transactions)
+        db.commit()
         return True
     except Exception as exc:
         print(f"Error adding transactions batch: {exc}")
-        session.rollback()
+        db.rollback()
         return False
-    finally:
-        session.close()
 
 
-def calculate_balances(organization_ids=None):
-    session = Session()
-
+def calculate_balances(db: Session, organization_ids=None):
     if organization_ids is None:
-        organization_ids = [org.id for org in session.query(Organization.id).all()]
+        organization_ids = [org.id for org in db.query(Organization.id).all()]
 
-    last_balances = session.query(
+    last_balances = db.query(
         Balance.organization_id,
         Balance.timestamp,
         Balance.balance
     ).filter(
         and_(
             Balance.id.in_(
-                session.query(func.max(Balance.id)).  # pylint: disable=E1102
+                db.query(func.max(Balance.id)).  # pylint: disable=E1102
                 group_by(Balance.organization_id)
             ),
             Balance.organization_id.in_(organization_ids)
@@ -63,13 +58,13 @@ def calculate_balances(organization_ids=None):
         org_id_dict[org_id] = (last_time, last_balance)
 
     for org_id, (last_time, last_balance) in org_id_dict.items():
-        transactions = session.query(Transaction).filter(
+        transactions = db.query(Transaction).filter(
             Transaction.organization_id == org_id,
             Transaction.timestamp > (last_time if last_time else datetime.min),
             Transaction.timestamp <= current_time
         ).all()
 
-        payments = session.query(Payment).filter(
+        payments = db.query(Payment).filter(
             Payment.organization_id == org_id,
             Payment.timestamp > (last_time if last_time else datetime.min),
             Payment.timestamp <= current_time
@@ -87,10 +82,8 @@ def calculate_balances(organization_ids=None):
                           completion_token_sum=completion_token_sum,
                           balance=new_balance)
 
-        session.add(balance)
+        db.add(balance)
         balances.append((org_id, new_balance))
 
-    session.commit()
-    session.close()
-
+    db.commit()
     return balances
