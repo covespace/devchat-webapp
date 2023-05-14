@@ -23,8 +23,7 @@ def create_organization(db: Session, name: str, country_code: str) -> Organizati
     try:
         db.add(organization)
         db.commit()
-        db.refresh(organization)  # Refresh to get the latest state from the database
-        db.expunge(organization)  # Detach the object from the session
+        db.refresh(organization)
         return organization
     except Exception as exc:
         db.rollback()
@@ -52,8 +51,7 @@ def create_user(db: Session, username: str, email: str,
     try:
         db.add(user)
         db.commit()
-        db.refresh(user)  # Refresh to get the latest state from the database
-        db.expunge(user)  # Detach the object from the session
+        db.refresh(user)
         return user
     except Exception as exc:
         db.rollback()
@@ -109,8 +107,7 @@ def create_access_token(db: Session, user_id: int, organization_id: int,
     try:
         db.add(token)
         db.commit()
-        db.refresh(token)  # Refresh to get the latest state from the database
-        db.expunge(token)  # Detach the object from the session
+        db.refresh(token)
         return token
     except Exception as exc:
         db.rollback()
