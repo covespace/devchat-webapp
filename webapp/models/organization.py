@@ -42,7 +42,7 @@ class Organization(Base):
                          default=func.now())  # pylint: disable=E1102
 
     users = relationship("User", secondary=organization_user, back_populates="organizations")
-    access_tokens = relationship("AccessToken", back_populates="organization")
+    access_keys = relationship("AccessKey", back_populates="organization")
     balances = relationship("Balance", back_populates="organization")
     payments = relationship("Payment", back_populates="organization")
 

@@ -6,7 +6,7 @@ from webapp.models import Organization
 from webapp.manage import create_organization
 from webapp.models import User
 from webapp.manage import create_user, add_user_to_organization
-from webapp.models import AccessToken
+from webapp.models import AccessKey
 from webapp.manage import create_access_token, revoke_access_token
 
 
@@ -117,7 +117,7 @@ def test_create_token_success(database):
     assert token.name == token_name
     assert token.revoke_time is None
 
-    db_token = database.query(AccessToken).filter_by(id=token.id).first()
+    db_token = database.query(AccessKey).filter_by(id=token.id).first()
 
     assert db_token is not None
     assert db_token.user_id == user.id
@@ -159,7 +159,7 @@ def test_revoke_token_success(database):
 
     assert result is True
 
-    db_token = database.query(AccessToken).filter_by(id=token.id).first()
+    db_token = database.query(AccessKey).filter_by(id=token.id).first()
 
     assert db_token is not None
     assert db_token.revoke_time is not None

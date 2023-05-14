@@ -3,7 +3,7 @@ management.py contains functions to create and update data in the database.
 """
 from webapp.database import Session
 from webapp.models import Organization, User
-from webapp.models import AccessToken
+from webapp.models import AccessKey
 from webapp.utils import now
 
 
@@ -85,7 +85,7 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int) ->
 
 
 def create_access_token(db: Session, user_id: int, organization_id: int,
-                        name: str, region: str = None) -> AccessToken:
+                        name: str, region: str = None) -> AccessKey:
     """
     Create a new access token for a user.
 
@@ -96,13 +96,13 @@ def create_access_token(db: Session, user_id: int, organization_id: int,
         region (str, optional): Region of the target service as the prefix of a token
 
     Returns:
-        AccessToken: The created access token object
+        AccessKey: The created access token object
     """
     if region is not None:
         if len(region) < 2 or len(region) > 4:
             raise ValueError("Region must be 2 to 4 characters.")
 
-    token = AccessToken(user_id=user_id, organization_id=organization_id, name=name, region=region)
+    token = AccessKey(user_id=user_id, organization_id=organization_id, name=name, region=region)
 
     try:
         db.add(token)
@@ -124,7 +124,7 @@ def revoke_access_token(db: Session, token_id: int) -> bool:
     Returns:
         bool: True if the token was revoked successfully, False otherwise
     """
-    token = db.query(AccessToken).filter(AccessToken.id == token_id).first()
+    token = db.query(AccessKey).filter(AccessKey.id == token_id).first()
 
     if token:
         token.revoke_time = now(db)

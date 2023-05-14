@@ -1,5 +1,5 @@
 """
-access_token.py contains the AccessToken model.
+access_token.py contains the AccessKey model.
 """
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import String, BigInteger, DateTime
@@ -9,7 +9,7 @@ from webapp.database import Base
 from webapp.utils import generate_access_token, hash_access_token
 
 
-class AccessToken(Base):
+class AccessKey(Base):
     """
     AppToken model
 
@@ -23,7 +23,7 @@ class AccessToken(Base):
         user_id (int): Foreign key for the user associated with the token
         organization_id (int): Foreign key for the organization associated with the token
     """
-    __tablename__ = 'access_tokens'
+    __tablename__ = 'access_keys'
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String, nullable=True)
@@ -35,8 +35,8 @@ class AccessToken(Base):
     user_id = Column(BigInteger, ForeignKey('users.id'))
     organization_id = Column(BigInteger, ForeignKey('organizations.id'))
 
-    user = relationship("User", back_populates="access_tokens")
-    organization = relationship("Organization", back_populates="access_tokens")
+    user = relationship("User", back_populates="access_keys")
+    organization = relationship("Organization", back_populates="access_keys")
 
     def __init__(self, *args, **kwargs):
         region = kwargs.pop('region')  # Extract the 'region' value and remove it from kwargs
@@ -48,7 +48,7 @@ class AccessToken(Base):
         self.prefix = f"dc-{region}-" + token[:4]
 
     def __repr__(self):
-        return f"<AccessToken(id={self.id}, name='{self.name}', " \
+        return f"<AccessKey(id={self.id}, name='{self.name}', " \
                f"token_hash='{self.token_hash}', prefix='{self.prefix}', " \
                f"create_time='{self.create_time}', revoke_time='{self.revoke_time}', " \
                f"user_id={self.user_id}, organization_id={self.organization_id})>"

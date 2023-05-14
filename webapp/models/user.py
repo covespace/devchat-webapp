@@ -36,7 +36,7 @@ class User(Base):
 
     organizations = relationship("Organization",
                                  secondary=organization_user, back_populates="users")
-    access_tokens = relationship("AccessToken", back_populates="user")
+    access_keys = relationship("AccessKey", back_populates="user")
 
     def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
