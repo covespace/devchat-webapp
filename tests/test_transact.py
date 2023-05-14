@@ -46,15 +46,15 @@ def test_add_transactions_batch_invalid_transactions(database):
          "prompt_tokens": 20, "completion_tokens": 30, "price": 0.2}
     ]
 
-    result = add_transactions_batch(database, invalid_transactions)
-    assert result is False
+    with pytest.raises(Exception):
+        add_transactions_batch(database, invalid_transactions)
 
     db_transactions = database.query(Transaction).all()
 
     assert len(db_transactions) == 0
 
 
-def test_calculate_balances_multiple_organizations(database):  # pylint: disable=W0613
+def test_balances_multiple_organizations(database):  # pylint: disable=W0613
     # Create two organizations
     org1 = create_organization(database, "Org1", "USA")
     org2 = create_organization(database, "Org2", "USA")
@@ -91,7 +91,7 @@ def test_calculate_balances_multiple_organizations(database):  # pylint: disable
     assert org2_balance == -0.45
 
 
-def test_calculate_balances_no_transactions(database):
+def test_balances_no_transactions(database):
     # Create an organization
     org = create_organization(database, "Org1", "USA")
 
@@ -104,7 +104,7 @@ def test_calculate_balances_no_transactions(database):
     assert org_balance == 0
 
 
-def test_calculate_balances_multiple_users(database):
+def test_balances_multiple_users(database):
     # Create an organization
     org = create_organization(database, "Org1", "USA")
 
@@ -137,7 +137,7 @@ def test_calculate_balances_multiple_users(database):
     assert org_balance == -0.7
 
 
-def test_calculate_balances_single_organization_interleaved_transactions(database):
+def test_balances_single_organization_interleaved_transactions(database):
     # Create an organization
     org = create_organization(database, "Org1", "USA")
 
@@ -178,7 +178,7 @@ def test_calculate_balances_single_organization_interleaved_transactions(databas
     assert org_balance2 == -0.7
 
 
-def test_calculate_balances_multiple_organizations_interleaved_transactions(database):
+def test_balances_multiple_organizations_interleaved_transactions(database):
     # Create two organizations
     org1 = create_organization(database, "Org1", "USA")
     org2 = create_organization(database, "Org2", "USA")
@@ -224,7 +224,7 @@ def test_calculate_balances_multiple_organizations_interleaved_transactions(data
     assert org2_balance2 == -0.45
 
 
-def test_calculate_balances_with_payments(database):
+def test_balances_with_payments(database):
     # Create an organization
     org = create_organization(database, "Org1", "USA")
 
@@ -257,7 +257,7 @@ def test_calculate_balances_with_payments(database):
     assert org_balance == pytest.approx(-0.25 + 0.2 + 0.1, rel=1e-9)
 
 
-def test_calculate_balances_interleaved_transactions_payments(database):
+def test_balances_interleaved_transactions_payments(database):
     # Create an organization
     org = create_organization(database, "Org1", "USA")
 
@@ -314,7 +314,7 @@ def test_calculate_balances_interleaved_transactions_payments(database):
     assert org_balance4 == pytest.approx(-0.1 + 0.2 - 0.15 + 0.1, rel=1e-9)
 
 
-def test_calculate_balances_with_transactions_and_payments(database):
+def test_balances_with_transactions_and_payments(database):
     # Create organizations
     org1 = create_organization(database, "Org1", "USA")
     org2 = create_organization(database, "Org2", "UK")

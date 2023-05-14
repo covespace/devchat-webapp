@@ -6,7 +6,7 @@ from webapp.manage import create_organization, create_user, add_user_to_organiza
 from webapp.query import get_users_of_organization
 from webapp.manage import create_access_token, revoke_access_token
 from webapp.query import get_valid_tokens_of_organization, get_revoked_token_hashes
-from webapp.utils import current_timestamp
+from webapp.utils import current_time
 
 
 def test_get_users_of_organization_success(database):
@@ -96,8 +96,8 @@ def test_get_revoked_tokens_in_time_range_success(database):
 
     revoke_access_token(database, token1.id)
 
-    start_time = current_timestamp() - datetime.timedelta(hours=1)
-    end_time = current_timestamp() + datetime.timedelta(hours=1)
+    start_time = current_time() - datetime.timedelta(hours=1)
+    end_time = current_time() + datetime.timedelta(hours=1)
 
     revoked_hashes = get_revoked_token_hashes(database, start_time, end_time)
 
@@ -107,8 +107,8 @@ def test_get_revoked_tokens_in_time_range_success(database):
 
 
 def test_get_revoked_tokens_in_time_range_no_tokens(database):
-    start_time = current_timestamp() - datetime.timedelta(hours=1)
-    end_time = current_timestamp() + datetime.timedelta(hours=1)
+    start_time = current_time() - datetime.timedelta(hours=1)
+    end_time = current_time() + datetime.timedelta(hours=1)
 
     revoked_tokens = get_revoked_token_hashes(database, start_time, end_time)
 

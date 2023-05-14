@@ -45,5 +45,5 @@ def verify_access_token(token: str) -> Tuple[str, str]:
         return None
 
 
-def current_timestamp() -> datetime:
+def current_time() -> datetime:
     return datetime.now(timezone.utc)

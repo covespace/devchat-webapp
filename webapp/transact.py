@@ -6,27 +6,23 @@ from typing import List
 from sqlalchemy import and_, func
 from webapp.database import Session
 from webapp.models import Organization, Transaction, Balance, Payment
-from webapp.utils import current_timestamp
+from webapp.utils import current_time
 
 
-def add_transactions_batch(db: Session, transactions: List[Transaction]) -> bool:
+def add_transactions_batch(db: Session, transactions: List[Transaction]):
     """
     Add a batch of transactions to the transactions table.
 
     Args:
         transactions (list): A list of Transaction objects to be added to the database.
-
-    Returns:
-        bool: True if the transactions were added successfully, False otherwise.
     """
     try:
         db.add_all(transactions)
         db.commit()
         return True
     except Exception as exc:
-        print(f"Error adding transactions batch: {exc}")
         db.rollback()
-        return False
+        raise exc
 
 
 def calculate_balances(db: Session, organization_ids=None):
@@ -50,7 +46,7 @@ def calculate_balances(db: Session, organization_ids=None):
     balances = []
 
     # Get a single timestamp for all balances
-    current_time = current_timestamp()
+    timestamp = current_time()
 
     # Store organization IDs in a dictionary
     org_id_dict = {org_id: (None, 0) for org_id in organization_ids}
@@ -60,14 +56,14 @@ def calculate_balances(db: Session, organization_ids=None):
     for org_id, (last_time, last_balance) in org_id_dict.items():
         transactions = db.query(Transaction).filter(
             Transaction.organization_id == org_id,
-            Transaction.timestamp > (last_time if last_time else datetime.min),
-            Transaction.timestamp <= current_time
+            Transaction.create_time > (last_time if last_time else datetime.min),
+            Transaction.create_time <= timestamp
         ).all()
 
         payments = db.query(Payment).filter(
             Payment.organization_id == org_id,
-            Payment.timestamp > (last_time if last_time else datetime.min),
-            Payment.timestamp <= current_time
+            Payment.create_time > (last_time if last_time else datetime.min),
+            Payment.create_time <= timestamp
         ).all()
 
         prompt_token_sum = sum(transaction.prompt_tokens for transaction in transactions)
@@ -77,7 +73,7 @@ def calculate_balances(db: Session, organization_ids=None):
 
         new_balance = last_balance - cost_sum + payment_sum
 
-        balance = Balance(organization_id=org_id, timestamp=current_time,
+        balance = Balance(organization_id=org_id, timestamp=timestamp,
                           prompt_token_sum=prompt_token_sum,
                           completion_token_sum=completion_token_sum,
                           balance=new_balance)
