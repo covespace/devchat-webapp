@@ -1,11 +1,14 @@
 """
 utils.py contains utility functions that are used throughout the webapp.
 """
+from datetime import datetime
 import hashlib
 import os
 from typing import Tuple
 import uuid
 import jwt
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import func
 
 
 def generate_uuid(name: str) -> str:
@@ -42,3 +45,7 @@ def verify_access_token(token: str) -> Tuple[str, str]:
         return None
     except jwt.InvalidTokenError:
         return None
+
+
+def now(db: Session) -> datetime:
+    return db.query(func.now()).scalar()  # pylint: disable=E1102

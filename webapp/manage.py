@@ -1,13 +1,13 @@
 """
 management.py contains functions to create and update data in the database.
 """
-import datetime
 from webapp.database import Session
 from webapp.models import Organization, User
 from webapp.models import AccessToken
+from webapp.utils import now
 
 
-def create_organization(name: str, country_code: str) -> Organization:
+def create_organization(db: Session, name: str, country_code: str) -> Organization:
     """
     Create a new organization.
 
@@ -18,23 +18,19 @@ def create_organization(name: str, country_code: str) -> Organization:
     Returns:
         Organization: The created organization object
     """
-    session = Session()
-    organization = Organization(name=name, country_code=country_code)
+    organization = Organization(db, name=name, country_code=country_code)
 
     try:
-        session.add(organization)
-        session.commit()
-        session.refresh(organization)  # Refresh to get the latest state from the database
-        session.expunge(organization)  # Detach the object from the session
+        db.add(organization)
+        db.commit()
+        db.refresh(organization)
         return organization
     except Exception as exc:
-        session.rollback()
+        db.rollback()
         raise exc
-    finally:
-        session.close()
 
 
-def create_user(username: str, email: str,
+def create_user(db: Session, username: str, email: str,
                 company: str = None, location: str = None, social_profile: str = None) -> User:
     """
     Create a new user.
@@ -49,24 +45,20 @@ def create_user(username: str, email: str,
     Returns:
         User: The created user object
     """
-    session = Session()
-    user = User(username=username, email=email,
+    user = User(db, username=username, email=email,
                 company=company, location=location, social_profile=social_profile)
 
     try:
-        session.add(user)
-        session.commit()
-        session.refresh(user)  # Refresh to get the latest state from the database
-        session.expunge(user)  # Detach the object from the session
+        db.add(user)
+        db.commit()
+        db.refresh(user)
         return user
     except Exception as exc:
-        session.rollback()
+        db.rollback()
         raise exc
-    finally:
-        session.close()
 
 
-def add_user_to_organization(user_id: int, organization_id: int) -> bool:
+def add_user_to_organization(db: Session, user_id: int, organization_id: int) -> bool:
     """
     Add an existing user to an organization.
 
@@ -77,25 +69,22 @@ def add_user_to_organization(user_id: int, organization_id: int) -> bool:
     Returns:
         bool: True if the user was added successfully, False otherwise
     """
-    session = Session()
-    user = session.query(User).filter(User.id == user_id).first()
-    organization = session.query(Organization).filter(Organization.id == organization_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
+    organization = db.query(Organization).filter(Organization.id == organization_id).first()
 
     if user and organization:
         organization.users.append(user)
         try:
-            session.commit()
+            db.commit()
             return True
         except Exception as exc:
-            session.rollback()
+            db.rollback()
             raise exc
-        finally:
-            session.close()
     else:
         return False
 
 
-def create_access_token(user_id: int, organization_id: int,
+def create_access_token(db: Session, user_id: int, organization_id: int,
                         name: str, region: str = None) -> AccessToken:
     """
     Create a new access token for a user.
@@ -113,23 +102,19 @@ def create_access_token(user_id: int, organization_id: int,
         if len(region) < 2 or len(region) > 4:
             raise ValueError("Region must be 2 to 4 characters.")
 
-    session = Session()
     token = AccessToken(user_id=user_id, organization_id=organization_id, name=name, region=region)
 
     try:
-        session.add(token)
-        session.commit()
-        session.refresh(token)  # Refresh to get the latest state from the database
-        session.expunge(token)  # Detach the object from the session
+        db.add(token)
+        db.commit()
+        db.refresh(token)
         return token
     except Exception as exc:
-        session.rollback()
+        db.rollback()
         raise exc
-    finally:
-        session.close()
 
 
-def revoke_access_token(token_id: int) -> bool:
+def revoke_access_token(db: Session, token_id: int) -> bool:
     """
     Revoke an access token by setting its revoke_time.
 
@@ -139,18 +124,15 @@ def revoke_access_token(token_id: int) -> bool:
     Returns:
         bool: True if the token was revoked successfully, False otherwise
     """
-    session = Session()
-    token = session.query(AccessToken).filter(AccessToken.id == token_id).first()
+    token = db.query(AccessToken).filter(AccessToken.id == token_id).first()
 
     if token:
-        token.revoke_time = datetime.datetime.utcnow()
+        token.revoke_time = now(db)
         try:
-            session.commit()
+            db.commit()
             return True
         except Exception as exc:
-            session.rollback()
+            db.rollback()
             raise exc
-        finally:
-            session.close()
     else:
         return False

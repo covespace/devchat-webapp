@@ -1,50 +1,42 @@
 """
 transact.py contains functions for making transactions.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from sqlalchemy import and_, func
 from webapp.database import Session
 from webapp.models import Organization, Transaction, Balance, Payment
+from webapp.utils import now
 
 
-def add_transactions_batch(transactions: List[Transaction]) -> bool:
+def add_transactions_batch(db: Session, transactions: List[Transaction]):
     """
     Add a batch of transactions to the transactions table.
 
     Args:
         transactions (list): A list of Transaction objects to be added to the database.
-
-    Returns:
-        bool: True if the transactions were added successfully, False otherwise.
     """
-    session = Session()
     try:
-        session.add_all(transactions)
-        session.commit()
+        db.add_all(transactions)
+        db.commit()
         return True
     except Exception as exc:
-        print(f"Error adding transactions batch: {exc}")
-        session.rollback()
-        return False
-    finally:
-        session.close()
+        db.rollback()
+        raise exc
 
 
-def calculate_balances(organization_ids=None):
-    session = Session()
-
+def calculate_balances(db: Session, organization_ids=None):
     if organization_ids is None:
-        organization_ids = [org.id for org in session.query(Organization.id).all()]
+        organization_ids = [org.id for org in db.query(Organization.id).all()]
 
-    last_balances = session.query(
+    last_balances = db.query(
         Balance.organization_id,
         Balance.timestamp,
         Balance.balance
     ).filter(
         and_(
             Balance.id.in_(
-                session.query(func.max(Balance.id)).  # pylint: disable=E1102
+                db.query(func.max(Balance.id)).  # pylint: disable=E1102
                 group_by(Balance.organization_id)
             ),
             Balance.organization_id.in_(organization_ids)
@@ -54,7 +46,7 @@ def calculate_balances(organization_ids=None):
     balances = []
 
     # Get a single timestamp for all balances
-    current_time = datetime.utcnow()
+    timestamp = now(db).replace(microsecond=0) - timedelta(seconds=1)
 
     # Store organization IDs in a dictionary
     org_id_dict = {org_id: (None, 0) for org_id in organization_ids}
@@ -62,16 +54,16 @@ def calculate_balances(organization_ids=None):
         org_id_dict[org_id] = (last_time, last_balance)
 
     for org_id, (last_time, last_balance) in org_id_dict.items():
-        transactions = session.query(Transaction).filter(
+        transactions = db.query(Transaction).filter(
             Transaction.organization_id == org_id,
-            Transaction.timestamp > (last_time if last_time else datetime.min),
-            Transaction.timestamp <= current_time
+            Transaction.create_time > (last_time if last_time else datetime.min),
+            Transaction.create_time <= timestamp
         ).all()
 
-        payments = session.query(Payment).filter(
+        payments = db.query(Payment).filter(
             Payment.organization_id == org_id,
-            Payment.timestamp > (last_time if last_time else datetime.min),
-            Payment.timestamp <= current_time
+            Payment.create_time > (last_time if last_time else datetime.min),
+            Payment.create_time <= timestamp
         ).all()
 
         prompt_token_sum = sum(transaction.prompt_tokens for transaction in transactions)
@@ -81,15 +73,13 @@ def calculate_balances(organization_ids=None):
 
         new_balance = last_balance - cost_sum + payment_sum
 
-        balance = Balance(organization_id=org_id, timestamp=current_time,
+        balance = Balance(organization_id=org_id, timestamp=timestamp,
                           prompt_token_sum=prompt_token_sum,
                           completion_token_sum=completion_token_sum,
                           balance=new_balance)
 
-        session.add(balance)
+        db.add(balance)
         balances.append((org_id, new_balance))
 
-    session.commit()
-    session.close()
-
+    db.commit()
     return balances

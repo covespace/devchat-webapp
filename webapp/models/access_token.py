@@ -1,9 +1,10 @@
 """
 access_token.py contains the AccessToken model.
 """
-import datetime
-from sqlalchemy import Column, String, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, ForeignKey
+from sqlalchemy import String, BigInteger, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import func
 from webapp.database import Base
 from webapp.utils import generate_access_token, hash_access_token
 
@@ -13,7 +14,7 @@ class AccessToken(Base):
     AppToken model
 
     Attributes:
-        id (int): Unique auto-increment integer identifier for the token
+        id (int): Unique auto-increment Biginteger identifier for the token
         name (str): Name of the token
         token_hash (str): Hash of the token for storage and comparison
         prefix (str): Prefix for the token based on the target service region
@@ -24,14 +25,15 @@ class AccessToken(Base):
     """
     __tablename__ = 'access_tokens'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String, nullable=True)
     token_hash = Column(String, nullable=False)
     prefix = Column(String, nullable=False)
-    create_time = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
-    revoke_time = Column(DateTime, nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    organization_id = Column(Integer, ForeignKey('organizations.id'))
+    create_time = Column(DateTime(timezone=True), nullable=False,
+                         default=func.now())  # pylint: disable=E1102
+    revoke_time = Column(DateTime(timezone=True), nullable=True)
+    user_id = Column(BigInteger, ForeignKey('users.id'))
+    organization_id = Column(BigInteger, ForeignKey('organizations.id'))
 
     user = relationship("User", back_populates="access_tokens")
     organization = relationship("Organization", back_populates="access_tokens")
@@ -46,7 +48,7 @@ class AccessToken(Base):
         self.prefix = f"dc-{region}-" + token[:4]
 
     def __repr__(self):
-        return f"<AccessToken(id={self.id}, name='{self.name}', \
-                token_hash='{self.token_hash}', prefix='{self.prefix}', \
-                create_time='{self.create_time}', revoke_time='{self.revoke_time}', \
-                user_id={self.user_id}, organization_id={self.organization_id})>"
+        return f"<AccessToken(id={self.id}, name='{self.name}', " \
+               f"token_hash='{self.token_hash}', prefix='{self.prefix}', " \
+               f"create_time='{self.create_time}', revoke_time='{self.revoke_time}', " \
+               f"user_id={self.user_id}, organization_id={self.organization_id})>"
