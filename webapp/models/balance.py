@@ -21,7 +21,7 @@ class Balance(Base):
     __tablename__ = 'balances'
 
     id = Column(BigInteger, primary_key=True, unique=True)
-    timestamp = Column(DateTime, nullable=False)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
     organization_id = Column(BigInteger, ForeignKey('organizations.id'))
     prompt_token_sum = Column(BigInteger, nullable=False)
     completion_token_sum = Column(BigInteger, nullable=False)

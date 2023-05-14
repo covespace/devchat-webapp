@@ -5,8 +5,8 @@ import random
 import re
 from sqlalchemy import Column, String, BigInteger, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import func
 from webapp.database import Base, Session
-from webapp.utils import current_timestamp
 from .organization import organization_user
 
 
@@ -31,7 +31,8 @@ class User(Base):
     company = Column(String, nullable=True)
     location = Column(String, nullable=True)
     social_profile = Column(String, nullable=True)
-    create_time = Column(DateTime, nullable=False, default=current_timestamp())
+    create_time = Column(DateTime(timezone=True), nullable=False,
+                         default=func.now())  # pylint: disable=E1102
 
     organizations = relationship("Organization",
                                  secondary=organization_user, back_populates="users")

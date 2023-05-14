@@ -6,7 +6,7 @@ from typing import List
 from sqlalchemy import and_, func
 from webapp.database import Session
 from webapp.models import Organization, Transaction, Balance, Payment
-from webapp.utils import current_time
+from webapp.utils import now
 
 
 def add_transactions_batch(db: Session, transactions: List[Transaction]):
@@ -46,7 +46,7 @@ def calculate_balances(db: Session, organization_ids=None):
     balances = []
 
     # Get a single timestamp for all balances
-    timestamp = current_time()
+    timestamp = now(db)
 
     # Store organization IDs in a dictionary
     org_id_dict = {org_id: (None, 0) for org_id in organization_ids}

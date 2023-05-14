@@ -2,8 +2,8 @@
 transaction.py contains the Transaction model.
 """
 from sqlalchemy import Column, BigInteger, Float, DateTime
+from sqlalchemy.sql.expression import func
 from webapp.database import Base
-from webapp.utils import current_timestamp
 
 
 class Transaction(Base):
@@ -17,7 +17,7 @@ class Transaction(Base):
         prompt_tokens (int): Number of tokens used for the prompt
         completion_tokens (int): Number of tokens used for the completion
         price (float): Price of the transaction
-        timestamp (datetime): Time when the transaction was created
+        create_time (datetime): Time when the transaction was created
     """
     __tablename__ = 'transactions'
 
@@ -27,10 +27,11 @@ class Transaction(Base):
     prompt_tokens = Column(BigInteger, nullable=False)
     completion_tokens = Column(BigInteger, nullable=False)
     price = Column(Float, nullable=False)
-    timestamp = Column(DateTime, nullable=False, default=current_timestamp())
+    create_time = Column(DateTime(timezone=True), nullable=False,
+                         default=func.now())  # pylint: disable=E1102
 
     def __repr__(self):
         return f"<Transaction(id={self.id}, " \
                f"organization_id={self.organization_id}, user_id={self.user_id}, " \
                f"prompt_tokens={self.prompt_tokens}, completion_tokens={self.completion_tokens}, " \
-               f"price={self.price}, timestamp='{self.timestamp}')>"
+               f"price={self.price}, create_time='{self.create_time}')>"

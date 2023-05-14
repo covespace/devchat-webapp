@@ -4,9 +4,9 @@ access_token.py contains the AccessToken model.
 from sqlalchemy import Column, ForeignKey
 from sqlalchemy import String, BigInteger, DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.expression import func
 from webapp.database import Base
 from webapp.utils import generate_access_token, hash_access_token
-from webapp.utils import current_timestamp
 
 
 class AccessToken(Base):
@@ -29,8 +29,9 @@ class AccessToken(Base):
     name = Column(String, nullable=True)
     token_hash = Column(String, nullable=False)
     prefix = Column(String, nullable=False)
-    create_time = Column(DateTime, nullable=False, default=current_timestamp())
-    revoke_time = Column(DateTime, nullable=True)
+    create_time = Column(DateTime(timezone=True), nullable=False,
+                         default=func.now())  # pylint: disable=E1102
+    revoke_time = Column(DateTime(timezone=True), nullable=True)
     user_id = Column(BigInteger, ForeignKey('users.id'))
     organization_id = Column(BigInteger, ForeignKey('organizations.id'))
 
