@@ -22,7 +22,8 @@ class Payment(Base):
     organization_id = Column(BigInteger, ForeignKey('organizations.id'))
     amount = Column(Float, nullable=False)
     currency = Column(String, nullable=False, default='USD')
-    create_time = Column(DateTime(timezone=True), nullable=False, default=func.now())
+    create_time = Column(DateTime(timezone=True), nullable=False,
+                         default=func.now())  # pylint: disable=E1102
 
     organization = relationship("Organization", back_populates="payments")
 

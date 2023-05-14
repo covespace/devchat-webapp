@@ -1,2 +1,4 @@
-cryptography==40.0.2
-pytest==7.3.1
+cryptography~=40.0.2
+psycopg~=3.1.9
+pytest~=7.3.1
+pytest-postgresql~=4.1.1
