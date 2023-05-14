@@ -1,7 +1,7 @@
 """
 transact.py contains functions for making transactions.
 """
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from sqlalchemy import and_, func
 from webapp.database import Session
@@ -46,7 +46,7 @@ def calculate_balances(db: Session, organization_ids=None):
     balances = []
 
     # Get a single timestamp for all balances
-    timestamp = now(db)
+    timestamp = now(db).replace(microsecond=0) - timedelta(seconds=1)
 
     # Store organization IDs in a dictionary
     org_id_dict = {org_id: (None, 0) for org_id in organization_ids}

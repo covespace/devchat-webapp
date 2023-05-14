@@ -1,10 +1,31 @@
 """
 test_transact.py contains tests for the transact.py module.
 """
+from datetime import timedelta
+import time
 import pytest
 from webapp.models import Transaction, Payment
 from webapp.manage import create_organization, create_user
 from webapp.transact import add_transactions_batch, calculate_balances
+from webapp.utils import now
+
+
+def _simulate_now(database):
+    """
+    Get current time minus two seconds.
+    To avoid clock drift, balances are calculated against a slightly earlier timepoint.
+    """
+    return now(database) - timedelta(seconds=2)
+
+
+def _call_calculate_balances(database):
+    """
+    Call calculate_balances() after delaying 1 second.
+    """
+    try:
+        return calculate_balances(database)
+    finally:
+        time.sleep(1)
 
 
 def test_add_transactions_batch_success(database):
@@ -18,11 +39,14 @@ def test_add_transactions_batch_success(database):
 
     transactions = [
         Transaction(organization_id=organization.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=organization.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15),
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=organization.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, price=0.2)
+                    prompt_tokens=20, completion_tokens=30, price=0.2,
+                    create_time=_simulate_now(database))
     ]
 
     result = add_transactions_batch(database, transactions)
@@ -65,21 +89,25 @@ def test_balances_multiple_organizations(database):  # pylint: disable=W0613
     # Add transactions for each organization
     transactions_org1 = [
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15)
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database))
     ]
     transactions_org2 = [
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, price=0.2),
+                    prompt_tokens=20, completion_tokens=30, price=0.2,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=25, completion_tokens=35, price=0.25)
+                    prompt_tokens=25, completion_tokens=35, price=0.25,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_org1)
     add_transactions_batch(database, transactions_org2)
 
     # Calculate balances
-    balances = calculate_balances(database)
+    balances = _call_calculate_balances(database)
 
     # Check if the balances are calculated correctly
     assert len(balances) == 2
@@ -96,7 +124,7 @@ def test_balances_no_transactions(database):
     org = create_organization(database, "Org1", "USA")
 
     # Calculate balances
-    balances = calculate_balances(database)
+    balances = _call_calculate_balances(database)
 
     # Check if the balance is 0 for the organization with no transactions
     assert len(balances) == 1
@@ -115,21 +143,25 @@ def test_balances_multiple_users(database):
     # Add transactions for each user
     transactions_user1 = [
         Transaction(organization_id=org.id, user_id=user1.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user1.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15)
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database))
     ]
     transactions_user2 = [
         Transaction(organization_id=org.id, user_id=user2.id,
-                    prompt_tokens=20, completion_tokens=30, price=0.2),
+                    prompt_tokens=20, completion_tokens=30, price=0.2,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user2.id,
-                    prompt_tokens=25, completion_tokens=35, price=0.25)
+                    prompt_tokens=25, completion_tokens=35, price=0.25,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_user1)
     add_transactions_batch(database, transactions_user2)
 
     # Calculate balances
-    balances = calculate_balances(database)
+    balances = _call_calculate_balances(database)
 
     # Check if the balance is calculated correctly for the organization with multiple users
     assert len(balances) == 1
@@ -147,26 +179,30 @@ def test_balances_single_organization_interleaved_transactions(database):
     # Add transactions for the user
     transactions1 = [
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15)
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions1)
 
     # Calculate balances after the first batch of transactions
-    balances1 = calculate_balances(database)
+    balances1 = _call_calculate_balances(database)
 
     # Add more transactions for the user
     transactions2 = [
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, price=0.2),
+                    prompt_tokens=20, completion_tokens=30, price=0.2,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=25, completion_tokens=35, price=0.25)
+                    prompt_tokens=25, completion_tokens=35, price=0.25,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions2)
 
     # Calculate balances after the second batch of transactions
-    balances2 = calculate_balances(database)
+    balances2 = _call_calculate_balances(database)
 
     # Check if the balances are calculated correctly after each batch of transactions
     assert len(balances1) == 1
@@ -189,26 +225,30 @@ def test_balances_multiple_organizations_interleaved_transactions(database):
     # Add transactions for the user in the first organization
     transactions_org1 = [
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15)
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_org1)
 
     # Calculate balances after the first batch of transactions
-    balances1 = calculate_balances(database)
+    balances1 = _call_calculate_balances(database)
 
     # Add transactions for the user in the second organization
     transactions_org2 = [
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, price=0.2),
+                    prompt_tokens=20, completion_tokens=30, price=0.2,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=25, completion_tokens=35, price=0.25)
+                    prompt_tokens=25, completion_tokens=35, price=0.25,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_org2)
 
     # Calculate balances after the second batch of transactions
-    balances2 = calculate_balances(database)
+    balances2 = _call_calculate_balances(database)
 
     # Check if the balances are calculated correctly after each batch of transactions
     assert len(balances1) == 2
@@ -234,22 +274,24 @@ def test_balances_with_payments(database):
     # Add transactions for the user
     transactions = [
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15)
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions)
 
     # Add payments for the organization
     payments = [
-        Payment(organization_id=org.id, amount=0.2),
-        Payment(organization_id=org.id, amount=0.1)
+        Payment(organization_id=org.id, amount=0.2, create_time=_simulate_now(database)),
+        Payment(organization_id=org.id, amount=0.1, create_time=_simulate_now(database))
     ]
     database.add_all(payments)
     database.commit()
 
     # Calculate balances
-    balances = calculate_balances(database)
+    balances = _call_calculate_balances(database)
 
     # Check if the balance is calculated correctly with payments
     assert len(balances) == 1
@@ -266,35 +308,37 @@ def test_balances_interleaved_transactions_payments(database):
 
     # Add a transaction for the user
     transaction1 = Transaction(organization_id=org.id, user_id=user.id,
-                               prompt_tokens=10, completion_tokens=20, price=0.1)
+                               prompt_tokens=10, completion_tokens=20, price=0.1,
+                               create_time=_simulate_now(database))
     add_transactions_batch(database, [transaction1])
 
     # Calculate balances after the first transaction
-    balances1 = calculate_balances(database)
+    balances1 = _call_calculate_balances(database)
 
     # Add a payment for the organization
-    payment1 = Payment(organization_id=org.id, amount=0.2)
+    payment1 = Payment(organization_id=org.id, amount=0.2, create_time=_simulate_now(database))
     database.add(payment1)
     database.commit()
 
     # Calculate balances after the first payment
-    balances2 = calculate_balances(database)
+    balances2 = _call_calculate_balances(database)
 
     # Add another transaction for the user
     transaction2 = Transaction(organization_id=org.id, user_id=user.id,
-                               prompt_tokens=15, completion_tokens=25, price=0.15)
+                               prompt_tokens=15, completion_tokens=25, price=0.15,
+                               create_time=_simulate_now(database))
     add_transactions_batch(database, [transaction2])
 
     # Calculate balances after the second transaction
-    balances3 = calculate_balances(database)
+    balances3 = _call_calculate_balances(database)
 
     # Add another payment for the organization
-    payment2 = Payment(organization_id=org.id, amount=0.1)
+    payment2 = Payment(organization_id=org.id, amount=0.1, create_time=_simulate_now(database))
     database.add(payment2)
     database.commit()
 
     # Calculate balances after the second payment
-    balances4 = calculate_balances(database)
+    balances4 = _call_calculate_balances(database)
 
     # Check if the balances are calculated correctly at each step
     assert len(balances1) == 1
@@ -326,19 +370,21 @@ def test_balances_with_transactions_and_payments(database):
     # Add transactions for the users
     transactions1 = [
         Transaction(organization_id=org1.id, user_id=user1.id,
-                    prompt_tokens=10, completion_tokens=20, price=0.1),
+                    prompt_tokens=10, completion_tokens=20, price=0.1,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user2.id,
-                    prompt_tokens=15, completion_tokens=25, price=0.15)
+                    prompt_tokens=15, completion_tokens=25, price=0.15,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions1)
 
     # Calculate balances after the first transactions
-    balances1 = calculate_balances(database)
+    balances1 = _call_calculate_balances(database)
 
     # Add payments for the organizations
     payments1 = [
-        Payment(organization_id=org1.id, amount=0.2),
-        Payment(organization_id=org2.id, amount=0.25)
+        Payment(organization_id=org1.id, amount=0.2, create_time=_simulate_now(database)),
+        Payment(organization_id=org2.id, amount=0.25, create_time=_simulate_now(database))
     ]
     database.add_all(payments1)
     database.commit()
@@ -346,22 +392,24 @@ def test_balances_with_transactions_and_payments(database):
     # Add more transactions for the users
     transactions2 = [
         Transaction(organization_id=org1.id, user_id=user1.id,
-                    prompt_tokens=20, completion_tokens=30, price=0.2),
+                    prompt_tokens=20, completion_tokens=30, price=0.2,
+                    create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user2.id,
-                    prompt_tokens=25, completion_tokens=35, price=0.25)
+                    prompt_tokens=25, completion_tokens=35, price=0.25,
+                    create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions2)
 
     # Add more payments for the organizations
     payments2 = [
-        Payment(organization_id=org1.id, amount=0.3),
-        Payment(organization_id=org2.id, amount=0.35)
+        Payment(organization_id=org1.id, amount=0.3, create_time=_simulate_now(database)),
+        Payment(organization_id=org2.id, amount=0.35, create_time=_simulate_now(database))
     ]
     database.add_all(payments2)
     database.commit()
 
     # Calculate balances after transactions and payments
-    balances2 = calculate_balances(database)
+    balances2 = _call_calculate_balances(database)
 
     # Check if the balances are calculated correctly for each organization at each step
     org1_balance1 = next(balance for org_id, balance in balances1 if org_id == org1.id)
