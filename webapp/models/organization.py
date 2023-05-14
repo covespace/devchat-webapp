@@ -3,7 +3,7 @@ organization.py contains the Organization model.
 """
 import random
 from sqlalchemy import Column, ForeignKey, Table
-from sqlalchemy import String, Float, Integer, DateTime
+from sqlalchemy import String, Float, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
 from webapp.utils import current_timestamp
@@ -14,8 +14,8 @@ from .payment import Payment  # pylint: disable=unused-import
 organization_user = Table(
     'organization_user',
     Base.metadata,
-    Column('organization_id', Integer, ForeignKey('organizations.id')),
-    Column('user_id', Integer, ForeignKey('users.id'))
+    Column('organization_id', BigInteger, ForeignKey('organizations.id')),
+    Column('user_id', BigInteger, ForeignKey('users.id'))
 )
 
 
@@ -33,7 +33,7 @@ class Organization(Base):
     """
     __tablename__ = 'organizations'
 
-    id = Column(Integer, primary_key=True, unique=True)
+    id = Column(BigInteger, primary_key=True, unique=True)
     name = Column(String, unique=True, nullable=False)
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
@@ -48,7 +48,7 @@ class Organization(Base):
     def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
         while True:
-            unique_id = random.randint(10000000, 99999999)
+            unique_id = random.randint(10000000000, 99999999999)
             if not db.query(Organization).filter(Organization.id == unique_id).first():
                 self.id = unique_id
                 db.add(self)
@@ -56,6 +56,6 @@ class Organization(Base):
                 break
 
     def __repr__(self):
-        return f"<Organization(id={self.id}, name='{self.name}', \
-                balance={self.balance}, currency='{self.currency}', \
-                country_code='{self.country_code}')>"
+        return f"<Organization(id={self.id}, name='{self.name}', " \
+               f"balance={self.balance}, currency='{self.currency}', " \
+               f"country_code='{self.country_code}')>"

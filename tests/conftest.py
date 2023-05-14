@@ -31,8 +31,10 @@ os.environ['JWT_PUBLIC_KEY'] = public_pem.decode('utf-8')
 
 
 @pytest.fixture(scope="function", name="database")
-def fixture_database():
-    db = Database("sqlite:///:memory:")
+def fixture_database(postgresql):
+    connection = f"postgresql+psycopg2://{postgresql.info.user}:@{postgresql.info.host}:" \
+                 f"{postgresql.info.port}/{postgresql.info.dbname}"
+    db = Database(connection)
     db.create_tables()
     with db.get_session() as session:
         yield session

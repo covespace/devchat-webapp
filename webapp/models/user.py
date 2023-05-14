@@ -3,7 +3,7 @@ user.py contains the User model.
 """
 import random
 import re
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy import Column, String, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from webapp.database import Base, Session
 from webapp.utils import current_timestamp
@@ -25,7 +25,7 @@ class User(Base):
     """
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, unique=True)
+    id = Column(BigInteger, primary_key=True, unique=True)
     username = Column(String, unique=True, nullable=False)
     email = Column(String, nullable=False)
     company = Column(String, nullable=True)
@@ -40,7 +40,7 @@ class User(Base):
     def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
         while True:
-            unique_id = random.randint(1000000000, 9999999999)
+            unique_id = random.randint(10000000000, 99999999999)
             if not db.query(User).filter(User.id == unique_id).first():
                 self.id = unique_id
                 if self.is_valid_email(self.email) and self.is_valid_username(self.username):
@@ -49,9 +49,9 @@ class User(Base):
                     break
 
     def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}', email='{self.email}', \
-                company='{self.company}', location='{self.location}', \
-                social_profile='{self.social_profile}')>"
+        return f"<User(id={self.id}, username='{self.username}', email='{self.email}', " \
+               f"company='{self.company}', location='{self.location}', " \
+               f"social_profile='{self.social_profile}')>"
 
     @staticmethod
     def is_valid_email(email):

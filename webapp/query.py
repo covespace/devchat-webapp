@@ -24,9 +24,9 @@ def get_users_of_organization(db: Session, organization_id: int,
     if columns is None:
         columns = ['id', 'username', 'email']
 
-    users = db.query(User).with_entities(*[getattr(User, column) for column in columns]).\
-        join(organization_user).\
-        join(Organization).\
+    users = db.query(User).with_entities(*[getattr(User, column) for column in columns]). \
+        join(organization_user). \
+        join(Organization). \
         filter(Organization.id == organization_id).all()
     return [list(user) for user in users]
 
@@ -57,6 +57,6 @@ def get_revoked_token_hashes(db: Session, start_time: datetime, end_time: dateti
     Returns:
         list: List of token hashes of revoked tokens within the specified time range.
     """
-    revoked_tokens = db.query(AccessToken.token_hash).\
+    revoked_tokens = db.query(AccessToken.token_hash). \
         filter(AccessToken.revoke_time >= start_time, AccessToken.revoke_time < end_time).all()
     return [token_hash[0] for token_hash in revoked_tokens]
