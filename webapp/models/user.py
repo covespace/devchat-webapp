@@ -37,17 +37,16 @@ class User(Base):
                                  secondary=organization_user, back_populates="users")
     access_tokens = relationship("AccessToken", back_populates="user")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        with Session() as session:
-            while True:
-                unique_id = random.randint(1000000000, 9999999999)
-                if not session.query(User).filter(User.id == unique_id).first():
-                    self.id = unique_id
-                    if self.is_valid_email(self.email) and self.is_valid_username(self.username):
-                        session.add(self)
-                        session.commit()
-                        break
+        while True:
+            unique_id = random.randint(1000000000, 9999999999)
+            if not db.query(User).filter(User.id == unique_id).first():
+                self.id = unique_id
+                if self.is_valid_email(self.email) and self.is_valid_username(self.username):
+                    db.add(self)
+                    db.commit()
+                    break
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', email='{self.email}', \

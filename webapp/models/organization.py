@@ -45,16 +45,15 @@ class Organization(Base):
     balances = relationship("Balance", back_populates="organization")
     payments = relationship("Payment", back_populates="organization")
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        with Session() as session:
-            while True:
-                unique_id = random.randint(10000000, 99999999)
-                if not session.query(Organization).filter(Organization.id == unique_id).first():
-                    self.id = unique_id
-                    session.add(self)
-                    session.commit()
-                    break
+        while True:
+            unique_id = random.randint(10000000, 99999999)
+            if not db.query(Organization).filter(Organization.id == unique_id).first():
+                self.id = unique_id
+                db.add(self)
+                db.commit()
+                break
 
     def __repr__(self):
         return f"<Organization(id={self.id}, name='{self.name}', \
