@@ -4,9 +4,9 @@ user.py contains the User model.
 import random
 import re
 from sqlalchemy import Column, String, BigInteger, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql.expression import func
-from webapp.database import Base, Session
+from webapp.controller import Base
 from .organization import organization_user
 
 

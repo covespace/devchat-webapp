@@ -2,10 +2,10 @@
 test_query.py contains tests for the query.py module.
 """
 import datetime
-from webapp.manage import create_organization, create_user, add_user_to_organization
-from webapp.query import get_users_of_organization
-from webapp.manage import create_access_token, revoke_access_token
-from webapp.query import get_valid_tokens_of_organization, get_revoked_token_hashes
+from webapp.controller import create_organization, create_user, add_user_to_organization
+from webapp.controller import get_users_of_organization
+from webapp.controller import create_access_token, revoke_access_token
+from webapp.controller import get_valid_tokens_of_organization, get_revoked_token_hashes
 from webapp.utils import now
 
 

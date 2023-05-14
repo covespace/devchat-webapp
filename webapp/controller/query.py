@@ -3,7 +3,7 @@ query.py contains functions to query the database.
 """
 from datetime import datetime
 from typing import List
-from webapp.database import Session
+from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user
 from webapp.model import AccessKey
 

@@ -4,7 +4,7 @@ transact.py contains functions for making transactions.
 from datetime import datetime, timedelta
 from typing import List
 from sqlalchemy import and_, func
-from webapp.database import Session
+from sqlalchemy.orm import Session
 from webapp.model import Organization, Transaction, Balance, Payment
 from webapp.utils import now
 

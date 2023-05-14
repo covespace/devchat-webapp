@@ -3,7 +3,7 @@ balance.py contains the Balance model.
 """
 from sqlalchemy import Column, BigInteger, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
-from webapp.database import Base
+from webapp.controller import Base
 
 
 class Balance(Base):

@@ -4,9 +4,9 @@ organization.py contains the Organization model.
 import random
 from sqlalchemy import Column, ForeignKey, Table
 from sqlalchemy import String, Float, BigInteger, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql.expression import func
-from webapp.database import Base, Session
+from webapp.controller import Base
 from .balance import Balance  # pylint: disable=unused-import
 from .payment import Payment  # pylint: disable=unused-import
 

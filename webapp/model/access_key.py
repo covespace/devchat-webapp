@@ -5,7 +5,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy import String, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
-from webapp.database import Base
+from webapp.controller import Base
 from webapp.utils import generate_access_token, hash_access_token
 
 

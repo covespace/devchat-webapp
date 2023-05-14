@@ -3,11 +3,11 @@ test_management.py contains tests for the functions in management.py.
 """
 import pytest
 from webapp.model import Organization
-from webapp.manage import create_organization
+from webapp.controller import create_organization
 from webapp.model import User
-from webapp.manage import create_user, add_user_to_organization
+from webapp.controller import create_user, add_user_to_organization
 from webapp.model import AccessKey
-from webapp.manage import create_access_token, revoke_access_token
+from webapp.controller import create_access_token, revoke_access_token
 
 
 def test_create_organization_success(database):

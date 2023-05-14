@@ -5,8 +5,8 @@ from datetime import timedelta
 import time
 import pytest
 from webapp.model import Transaction, Payment
-from webapp.manage import create_organization, create_user
-from webapp.transact import add_transactions_batch, calculate_balances
+from webapp.controller import create_organization, create_user
+from webapp.controller import add_transactions_batch, calculate_balances
 from webapp.utils import now
 
 

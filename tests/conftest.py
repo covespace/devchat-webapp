@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 import pytest
-from webapp.database import Database, Base
+from webapp.controller import Database, Base
 
 
 private_key = rsa.generate_private_key(
