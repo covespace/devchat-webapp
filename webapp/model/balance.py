@@ -1,7 +1,7 @@
 """
 balance.py contains the Balance model.
 """
-from sqlalchemy import Column, BigInteger, DateTime, ForeignKey, Float
+from sqlalchemy import Column, BigInteger, DateTime, ForeignKey, Float, String
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -17,6 +17,7 @@ class Balance(Base):
         prompt_token_sum (int): Sum of prompt tokens since the last timestamp
         completion_token_sum (int): Sum of completion tokens since the last timestamp
         balance (float): Balance of the organization at the timestamp
+        currency (str): Currency of the balance
     """
     __tablename__ = 'balances'
 
@@ -26,6 +27,7 @@ class Balance(Base):
     prompt_token_sum = Column(BigInteger, nullable=False)
     completion_token_sum = Column(BigInteger, nullable=False)
     balance = Column(Float, nullable=False)
+    currency = Column(String, nullable=False, default='USD')
 
     organization = relationship("Organization", back_populates="balances")
 
@@ -34,4 +36,4 @@ class Balance(Base):
                f"organization_id={self.organization_id}, " \
                f"prompt_token_sum={self.prompt_token_sum}, " \
                f"completion_token_sum={self.completion_token_sum}, " \
-               f"balance={self.balance})>"
+               f"balance={self.balance}, currency={self.currency})>"
