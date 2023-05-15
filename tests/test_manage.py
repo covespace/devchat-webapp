@@ -7,7 +7,7 @@ from webapp.controller import create_organization
 from webapp.model import User
 from webapp.controller import create_user, add_user_to_organization
 from webapp.model import AccessKey
-from webapp.controller import create_access_token, revoke_access_token
+from webapp.controller import create_access_key, revoke_access_key
 
 
 def test_create_organization_success(database):
@@ -99,7 +99,7 @@ def test_add_user_to_organization_invalid_ids(database):
     assert result is False
 
 
-def test_create_token_success(database):
+def test_create_key_success(database):
     org_name = "Test Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
@@ -108,25 +108,25 @@ def test_create_token_success(database):
     email = "testuser@example.com"
     user = create_user(database, username, email)
 
-    token_name = "Test Token"
+    key_name = "Test Key"
     region = "US"
-    token = create_access_token(database, user.id, organization.id, token_name, region)
+    key = create_access_key(database, user.id, organization.id, key_name, region)
 
-    assert token.user_id == user.id
-    assert token.organization_id == organization.id
-    assert token.name == token_name
-    assert token.revoke_time is None
+    assert key.user_id == user.id
+    assert key.organization_id == organization.id
+    assert key.name == key_name
+    assert key.revoke_time is None
 
-    db_token = database.query(AccessKey).filter_by(id=token.id).first()
+    db_key = database.query(AccessKey).filter_by(id=key.id).first()
 
-    assert db_token is not None
-    assert db_token.user_id == user.id
-    assert db_token.organization_id == organization.id
-    assert db_token.name == token_name
-    assert db_token.revoke_time is None
+    assert db_key is not None
+    assert db_key.user_id == user.id
+    assert db_key.organization_id == organization.id
+    assert db_key.name == key_name
+    assert db_key.revoke_time is None
 
 
-def test_create_token_invalid_region(database):
+def test_create_key_invalid_region(database):
     org_name = "Test Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
@@ -135,14 +135,14 @@ def test_create_token_invalid_region(database):
     email = "testuser@example.com"
     user = create_user(database, username, email)
 
-    token_name = "Test Token"
+    key_name = "Test Key"
     invalid_region = "USA123"
 
     with pytest.raises(ValueError):
-        create_access_token(database, user.id, organization.id, token_name, invalid_region)
+        create_access_key(database, user.id, organization.id, key_name, invalid_region)
 
 
-def test_revoke_token_success(database):
+def test_revoke_key_success(database):
     org_name = "Test Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
@@ -151,20 +151,20 @@ def test_revoke_token_success(database):
     email = "testuser@example.com"
     user = create_user(database, username, email)
 
-    token_name = "Test Token"
+    key_name = "Test Key"
     region = "US"
-    token = create_access_token(database, user.id, organization.id, token_name, region)
+    key = create_access_key(database, user.id, organization.id, key_name, region)
 
-    result = revoke_access_token(database, token.id)
+    result = revoke_access_key(database, key.id)
 
     assert result is True
 
-    db_token = database.query(AccessKey).filter_by(id=token.id).first()
+    db_key = database.query(AccessKey).filter_by(id=key.id).first()
 
-    assert db_token is not None
-    assert db_token.revoke_time is not None
+    assert db_key is not None
+    assert db_key.revoke_time is not None
 
 
-def test_revoke_token_invalid_id(database):
-    result = revoke_access_token(database, 999)
+def test_revoke_key_invalid_id(database):
+    result = revoke_access_key(database, 999)
     assert result is False

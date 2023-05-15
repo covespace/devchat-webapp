@@ -19,7 +19,7 @@ def generate_uuid(name: str) -> str:
     return str(dev_uuid)
 
 
-def generate_access_token(user_id: str, organization_id: str) -> str:
+def generate_access_key(user_id: str, organization_id: str) -> str:
     # Load the RSA private key from environment variables
     private_key = os.environ['JWT_PRIVATE_KEY']
     payload = {
@@ -27,19 +27,19 @@ def generate_access_token(user_id: str, organization_id: str) -> str:
         'organization_id': organization_id,
         'jti': str(uuid.uuid4())  # Add a unique identifier (UUID) to the payload
     }
-    token = jwt.encode(payload, private_key, algorithm='RS256')
-    return token
+    key = jwt.encode(payload, private_key, algorithm='RS256')
+    return key
 
 
-def hash_access_token(token: str) -> str:
-    return hashlib.sha256(token.encode()).hexdigest()
+def hash_access_key(key: str) -> str:
+    return hashlib.sha256(key.encode()).hexdigest()
 
 
-def verify_access_token(token: str) -> Tuple[str, str]:
+def verify_access_key(key: str) -> Tuple[str, str]:
     # Load the RSA public key from environment variables
     public_key = os.environ['JWT_PUBLIC_KEY']
     try:
-        payload = jwt.decode(token, public_key, algorithms=['RS256'])
+        payload = jwt.decode(key, public_key, algorithms=['RS256'])
         return payload['user_id'], payload['organization_id']
     except jwt.ExpiredSignatureError:
         return None

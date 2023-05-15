@@ -4,8 +4,8 @@ test_query.py contains tests for the query.py module.
 import datetime
 from webapp.controller import create_organization, create_user, add_user_to_organization
 from webapp.controller import get_users_of_organization
-from webapp.controller import create_access_token, revoke_access_token
-from webapp.controller import get_valid_tokens_of_organization, get_revoked_token_hashes
+from webapp.controller import create_access_key, revoke_access_key
+from webapp.controller import get_valid_keys_of_organization, get_revoked_key_hashes
 from webapp.utils import now
 
 
@@ -58,7 +58,7 @@ def test_get_users_of_organization_invalid_id(database):
     assert users == []
 
 
-def test_get_valid_tokens_of_organization_success(database):
+def test_get_valid_keys_of_organization_success(database):
     org_name = "Test Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
@@ -69,18 +69,18 @@ def test_get_valid_tokens_of_organization_success(database):
 
     add_user_to_organization(database, user.id, organization.id)
 
-    token1 = create_access_token(database, user.id, organization.id, "token1")
-    token2 = create_access_token(database, user.id, organization.id, "token2")
+    key1 = create_access_key(database, user.id, organization.id, "key1")
+    key2 = create_access_key(database, user.id, organization.id, "key2")
 
-    valid_tokens = get_valid_tokens_of_organization(database, organization.id)
-    valid_hashes = [token.token_hash for token in valid_tokens]
+    valid_keys = get_valid_keys_of_organization(database, organization.id)
+    valid_hashes = [key.key_hash for key in valid_keys]
 
-    assert len(valid_tokens) == 2
-    assert token1.token_hash in valid_hashes
-    assert token2.token_hash in valid_hashes
+    assert len(valid_keys) == 2
+    assert key1.key_hash in valid_hashes
+    assert key2.key_hash in valid_hashes
 
 
-def test_get_revoked_tokens_in_time_range_success(database):
+def test_get_revoked_keys_in_time_range_success(database):
     org_name = "Test Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
@@ -91,27 +91,27 @@ def test_get_revoked_tokens_in_time_range_success(database):
 
     add_user_to_organization(database, user.id, organization.id)
 
-    token1 = create_access_token(database, user.id, organization.id, 'token1')
-    token2 = create_access_token(database, user.id, organization.id, 'token2')
+    key1 = create_access_key(database, user.id, organization.id, 'key1')
+    key2 = create_access_key(database, user.id, organization.id, 'key2')
 
-    revoke_access_token(database, token1.id)
+    revoke_access_key(database, key1.id)
 
     current_time = now(database)
     start_time = current_time - datetime.timedelta(hours=1)
     end_time = current_time + datetime.timedelta(hours=1)
 
-    revoked_hashes = get_revoked_token_hashes(database, start_time, end_time)
+    revoked_hashes = get_revoked_key_hashes(database, start_time, end_time)
 
     assert len(revoked_hashes) == 1
-    assert token1.token_hash in revoked_hashes
-    assert token2.token_hash not in revoked_hashes
+    assert key1.key_hash in revoked_hashes
+    assert key2.key_hash not in revoked_hashes
 
 
-def test_get_revoked_tokens_in_time_range_no_tokens(database):
+def test_get_revoked_keys_in_time_range_no_keys(database):
     current_time = now(database)
     start_time = current_time - datetime.timedelta(hours=1)
     end_time = current_time + datetime.timedelta(hours=1)
 
-    revoked_tokens = get_revoked_token_hashes(database, start_time, end_time)
+    revoked_keys = get_revoked_key_hashes(database, start_time, end_time)
 
-    assert revoked_tokens == []
+    assert revoked_keys == []

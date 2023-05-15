@@ -84,50 +84,50 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int) ->
         return False
 
 
-def create_access_token(db: Session, user_id: int, organization_id: int,
-                        name: str, region: str = None) -> AccessKey:
+def create_access_key(db: Session, user_id: int, organization_id: int,
+                      name: str, region: str = None) -> AccessKey:
     """
-    Create a new access token for a user.
+    Create a new access key for a user.
 
     Args:
         user_id (int): Unique ID of the user
         organization_id (int): Unique ID of the organization
-        name (str): Name of the token
-        region (str, optional): Region of the target service as the prefix of a token
+        name (str): Name of the key
+        region (str, optional): Region of the target service as the prefix of a key
 
     Returns:
-        AccessKey: The created access token object
+        AccessKey: The created access key object
     """
     if region is not None:
         if len(region) < 2 or len(region) > 4:
             raise ValueError("Region must be 2 to 4 characters.")
 
-    token = AccessKey(user_id=user_id, organization_id=organization_id, name=name, region=region)
+    key = AccessKey(user_id=user_id, organization_id=organization_id, name=name, region=region)
 
     try:
-        db.add(token)
+        db.add(key)
         db.commit()
-        db.refresh(token)
-        return token
+        db.refresh(key)
+        return key
     except Exception as exc:
         db.rollback()
         raise exc
 
 
-def revoke_access_token(db: Session, token_id: int) -> bool:
+def revoke_access_key(db: Session, key_id: int) -> bool:
     """
-    Revoke an access token by setting its revoke_time.
+    Revoke an access key by setting its revoke_time.
 
     Args:
-        token_id (int): Unique ID of the access token
+        key_id (int): Unique ID of the access key
 
     Returns:
-        bool: True if the token was revoked successfully, False otherwise
+        bool: True if the key was revoked successfully, False otherwise
     """
-    token = db.query(AccessKey).filter(AccessKey.id == token_id).first()
+    key = db.query(AccessKey).filter(AccessKey.id == key_id).first()
 
-    if token:
-        token.revoke_time = now(db)
+    if key:
+        key.revoke_time = now(db)
         try:
             db.commit()
             return True
