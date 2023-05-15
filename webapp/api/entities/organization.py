@@ -1,10 +1,10 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from webapp.controller.manage import create_organization
-from webapp.controller.query import get_users_of_organization
+from webapp.controller import create_organization
+from webapp.controller import get_users_of_organization
 from webapp.model import Organization, User
-from webapp.api.main import get_db
+from webapp.api.dependencies import get_db
 
 
 router = APIRouter()
