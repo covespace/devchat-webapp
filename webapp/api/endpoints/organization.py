@@ -6,11 +6,10 @@ from webapp.controller import get_users_of_organization
 from webapp.model import Organization, User
 from webapp.api.dependencies import get_db
 
-
 router = APIRouter()
 
 
-@router.post("/", response_model=Organization)
+@router.post("/organizations", response_model=Organization)
 def create_org(name: str, country_code: str, db: Session = Depends(get_db)):
     return create_organization(db, name, country_code)
 
