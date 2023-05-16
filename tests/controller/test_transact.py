@@ -39,13 +39,13 @@ def test_add_transactions_batch_success(database):
 
     transactions = [
         Transaction(organization_id=organization.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=organization.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=organization.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, cost=0.2,
+                    prompt_tokens=20, response_tokens=30, cost=0.2,
                     create_time=_simulate_now(database))
     ]
 
@@ -56,18 +56,18 @@ def test_add_transactions_batch_success(database):
 
     assert len(db_transactions) == 3
     assert db_transactions[0].prompt_tokens == 10
-    assert db_transactions[1].completion_tokens == 25
+    assert db_transactions[1].response_tokens == 25
     assert db_transactions[2].cost == 0.2
 
 
 def test_add_transactions_batch_invalid_transactions(database):
     invalid_transactions = [
         {"organization_id": 1, "user_id": 1,
-         "prompt_tokens": 10, "completion_tokens": 20, "cost": 0.1},
+         "prompt_tokens": 10, "response_tokens": 20, "cost": 0.1},
         {"organization_id": 1, "user_id": 1,
-         "prompt_tokens": 15, "completion_tokens": 25, "cost": 0.15},
+         "prompt_tokens": 15, "response_tokens": 25, "cost": 0.15},
         {"organization_id": 1, "user_id": 1,
-         "prompt_tokens": 20, "completion_tokens": 30, "cost": 0.2}
+         "prompt_tokens": 20, "response_tokens": 30, "cost": 0.2}
     ]
 
     with pytest.raises(Exception):
@@ -89,18 +89,18 @@ def test_balances_multiple_organizations(database):  # pylint: disable=W0613
     # Add transactions for each organization
     transactions_org1 = [
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database))
     ]
     transactions_org2 = [
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, cost=0.2,
+                    prompt_tokens=20, response_tokens=30, cost=0.2,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=25, completion_tokens=35, cost=0.25,
+                    prompt_tokens=25, response_tokens=35, cost=0.25,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_org1)
@@ -143,18 +143,18 @@ def test_balances_multiple_users(database):
     # Add transactions for each user
     transactions_user1 = [
         Transaction(organization_id=org.id, user_id=user1.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user1.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database))
     ]
     transactions_user2 = [
         Transaction(organization_id=org.id, user_id=user2.id,
-                    prompt_tokens=20, completion_tokens=30, cost=0.2,
+                    prompt_tokens=20, response_tokens=30, cost=0.2,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user2.id,
-                    prompt_tokens=25, completion_tokens=35, cost=0.25,
+                    prompt_tokens=25, response_tokens=35, cost=0.25,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_user1)
@@ -179,10 +179,10 @@ def test_balances_single_organization_interleaved_transactions(database):
     # Add transactions for the user
     transactions1 = [
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions1)
@@ -193,10 +193,10 @@ def test_balances_single_organization_interleaved_transactions(database):
     # Add more transactions for the user
     transactions2 = [
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, cost=0.2,
+                    prompt_tokens=20, response_tokens=30, cost=0.2,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=25, completion_tokens=35, cost=0.25,
+                    prompt_tokens=25, response_tokens=35, cost=0.25,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions2)
@@ -225,10 +225,10 @@ def test_balances_multiple_organizations_interleaved_transactions(database):
     # Add transactions for the user in the first organization
     transactions_org1 = [
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org1.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_org1)
@@ -239,10 +239,10 @@ def test_balances_multiple_organizations_interleaved_transactions(database):
     # Add transactions for the user in the second organization
     transactions_org2 = [
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=20, completion_tokens=30, cost=0.2,
+                    prompt_tokens=20, response_tokens=30, cost=0.2,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user.id,
-                    prompt_tokens=25, completion_tokens=35, cost=0.25,
+                    prompt_tokens=25, response_tokens=35, cost=0.25,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions_org2)
@@ -274,10 +274,10 @@ def test_balances_with_payments(database):
     # Add transactions for the user
     transactions = [
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org.id, user_id=user.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions)
@@ -308,7 +308,7 @@ def test_balances_interleaved_transactions_payments(database):
 
     # Add a transaction for the user
     transaction1 = Transaction(organization_id=org.id, user_id=user.id,
-                               prompt_tokens=10, completion_tokens=20, cost=0.1,
+                               prompt_tokens=10, response_tokens=20, cost=0.1,
                                create_time=_simulate_now(database))
     add_transactions_batch(database, [transaction1])
 
@@ -325,7 +325,7 @@ def test_balances_interleaved_transactions_payments(database):
 
     # Add another transaction for the user
     transaction2 = Transaction(organization_id=org.id, user_id=user.id,
-                               prompt_tokens=15, completion_tokens=25, cost=0.15,
+                               prompt_tokens=15, response_tokens=25, cost=0.15,
                                create_time=_simulate_now(database))
     add_transactions_batch(database, [transaction2])
 
@@ -370,10 +370,10 @@ def test_balances_with_transactions_and_payments(database):
     # Add transactions for the users
     transactions1 = [
         Transaction(organization_id=org1.id, user_id=user1.id,
-                    prompt_tokens=10, completion_tokens=20, cost=0.1,
+                    prompt_tokens=10, response_tokens=20, cost=0.1,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user2.id,
-                    prompt_tokens=15, completion_tokens=25, cost=0.15,
+                    prompt_tokens=15, response_tokens=25, cost=0.15,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions1)
@@ -392,10 +392,10 @@ def test_balances_with_transactions_and_payments(database):
     # Add more transactions for the users
     transactions2 = [
         Transaction(organization_id=org1.id, user_id=user1.id,
-                    prompt_tokens=20, completion_tokens=30, cost=0.2,
+                    prompt_tokens=20, response_tokens=30, cost=0.2,
                     create_time=_simulate_now(database)),
         Transaction(organization_id=org2.id, user_id=user2.id,
-                    prompt_tokens=25, completion_tokens=35, cost=0.25,
+                    prompt_tokens=25, response_tokens=35, cost=0.25,
                     create_time=_simulate_now(database))
     ]
     add_transactions_batch(database, transactions2)

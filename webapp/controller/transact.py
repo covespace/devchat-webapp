@@ -67,7 +67,7 @@ def calculate_balances(db: Session, organization_ids=None):
         ).all()
 
         prompt_token_sum = sum(transaction.prompt_tokens for transaction in transactions)
-        completion_token_sum = sum(transaction.completion_tokens for transaction in transactions)
+        response_token_sum = sum(transaction.response_tokens for transaction in transactions)
         cost_sum = sum(transaction.cost for transaction in transactions)
         payment_sum = sum(payment.amount for payment in payments)
 
@@ -75,7 +75,7 @@ def calculate_balances(db: Session, organization_ids=None):
 
         balance = Balance(organization_id=org_id, timestamp=timestamp,
                           prompt_token_sum=prompt_token_sum,
-                          completion_token_sum=completion_token_sum,
+                          response_token_sum=response_token_sum,
                           balance=new_balance)
 
         db.add(balance)
