@@ -1,7 +1,6 @@
 """
 management.py contains functions to create and update data in the database.
 """
-from typing import List
 from sqlalchemy import insert
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user, Role
