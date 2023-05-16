@@ -1,8 +1,9 @@
 """
 management.py contains functions to create and update data in the database.
 """
+from sqlalchemy import insert
 from sqlalchemy.orm import Session
-from webapp.model import Organization, User
+from webapp.model import Organization, User, organization_user, Role
 from webapp.model import AccessKey
 from webapp.utils import now
 
@@ -58,13 +59,15 @@ def create_user(db: Session, username: str, email: str,
         raise exc
 
 
-def add_user_to_organization(db: Session, user_id: int, organization_id: int) -> bool:
+def add_user_to_organization(db: Session, user_id: int, organization_id: int,
+                             role: Role = Role.MEMBER) -> bool:
     """
     Add an existing user to an organization.
 
     Args:
         user_id (int): Unique ID of the user
         organization_id (int): Unique ID of the organization
+        roles (List[Role], optional): List of roles to assign to the user
 
     Returns:
         bool: True if the user was added successfully, False otherwise
@@ -73,7 +76,37 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int) ->
     organization = db.query(Organization).filter(Organization.id == organization_id).first()
 
     if user and organization:
-        organization.users.append(user)
+        stmt = insert(organization_user).values(
+            organization_id=organization_id,
+            user_id=user_id,
+            role=role
+        )
+        try:
+            db.execute(stmt)
+            db.commit()
+            return True
+        except Exception as exc:
+            db.rollback()
+            raise exc
+    else:
+        return False
+
+
+def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: Role) -> bool:
+    user_organization = (
+        db.query(organization_user)
+        .filter(organization_user.c.user_id == user_id)
+        .filter(organization_user.c.organization_id == organization_id)
+        .first()
+    )
+
+    if user_organization:
+        db.execute(
+            organization_user.update()
+            .where(organization_user.c.user_id == user_id)
+            .where(organization_user.c.organization_id == organization_id)
+            .values(role=role)
+        )
         try:
             db.commit()
             return True

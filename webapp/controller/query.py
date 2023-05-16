@@ -48,7 +48,7 @@ def get_valid_keys_of_organization(db: Session, organization_id: int) -> List[Ac
 
 def get_revoked_key_hashes(db: Session, start_time: datetime, end_time: datetime) -> List[str]:
     """
-    Get revoked access keys that were revoked within the specified time range [start_time, end_time).
+    Get access keys that were revoked within the specified time range [start_time, end_time).
 
     Args:
         start_time (datetime): Start time of the time range
