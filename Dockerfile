@@ -4,12 +4,6 @@ FROM python:3.9-slim-buster
 # Set the working directory in the container to /app
 WORKDIR /app
 
-# Define the build-time variable
-ARG DB_URL
-
-# Set the environment variable in the container
-ENV DATABASE_URL=$DB_URL
-
 # Add the requirements.txt file to the container
 ADD ./webapp/requirements.txt ./webapp/
 
