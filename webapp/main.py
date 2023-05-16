@@ -1,7 +1,10 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from webapp.api.routers import api_router
+from webapp.dependencies import init_tables
 
 app = FastAPI(title="DevChat Webapp", version="0.1.0")
 
@@ -23,4 +26,5 @@ def main():
 
 
 if __name__ == "__main__":
+    init_tables()
     main()
