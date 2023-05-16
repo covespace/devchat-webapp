@@ -2,10 +2,10 @@
 test_management.py contains tests for the functions in management.py.
 """
 import pytest
-from webapp.model import Organization
+from webapp.model import Organization, organization_user, Role
 from webapp.controller import create_organization
 from webapp.model import User
-from webapp.controller import create_user, add_user_to_organization
+from webapp.controller import create_user, add_user_to_organization, assign_role_to_user
 from webapp.model import AccessKey
 from webapp.controller import create_access_key, revoke_access_key
 
@@ -97,6 +97,63 @@ def test_add_user_to_organization_success(database):
 def test_add_user_to_organization_invalid_ids(database):
     result = add_user_to_organization(database, 999, 999)
     assert result is False
+
+
+def test_add_user_to_organization_with_role(database):
+    org_name = "Test Organization"
+    country_code = "USA"
+    organization = create_organization(database, org_name, country_code)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(database, username, email)
+
+    result = add_user_to_organization(database, user.id, organization.id, role=Role.OWNER)
+
+    assert result is True
+
+    db_organization = database.query(Organization).filter_by(id=organization.id).first()
+    assert db_organization is not None
+    users = db_organization.users
+
+    assert len(users) == 1
+    assert users[0].id == user.id
+
+    user_organization = (
+        database.query(organization_user)
+        .filter(organization_user.c.user_id == user.id)
+        .filter(organization_user.c.organization_id == organization.id)
+        .first()
+    )
+
+    assert user_organization is not None
+    assert user_organization.role == Role.OWNER
+
+
+def test_assign_role_to_user(database):
+    org_name = "Test Organization"
+    country_code = "USA"
+    organization = create_organization(database, org_name, country_code)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(database, username, email)
+
+    add_user_to_organization(database, user.id, organization.id)
+
+    result = assign_role_to_user(database, user.id, organization.id, role=Role.OWNER)
+
+    assert result is True
+
+    user_organization = (
+        database.query(organization_user)
+        .filter(organization_user.c.user_id == user.id)
+        .filter(organization_user.c.organization_id == organization.id)
+        .first()
+    )
+
+    assert user_organization is not None
+    assert user_organization.role == Role.OWNER
 
 
 def test_create_key_success(database):
