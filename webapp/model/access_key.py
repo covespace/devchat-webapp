@@ -40,7 +40,7 @@ class AccessKey(Base):
         if region is None:
             region = 'any'
         super().__init__(*args, **kwargs)
-        key = generate_access_key(self.user_id, self.organization_id)
+        key = generate_access_key(self.organization_id)
         self.key_hash = hash_access_key(key)
         self.prefix = f"dc-{region}-" + key[:4]
 
