@@ -1,12 +1,13 @@
+from datetime import datetime
 from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException, Body
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
 from webapp.controller import create_organization
 from webapp.controller import get_users_of_organization
-from webapp.model import Organization, User
 from webapp.dependencies import get_db
-from pydantic import BaseModel
-from datetime import datetime
 
 router = APIRouter()
 

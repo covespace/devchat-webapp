@@ -11,9 +11,7 @@ iniconfig==2.0.0
 jmespath==1.0.1
 packaging==23.1
 pluggy==1.0.0
-psycopg==3.1.9
-psycopg-binary==3.1.9
-psycopg-pool==3.1.7
+psycopg2-binary==2.9.6
 pycparser==2.21
 pydantic==1.10.7
 PyJWT==2.7.0
