@@ -1,6 +1,9 @@
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim-buster
 
+# Set log level. (INFO, DEBUG, WARNING, ERROR, CRITICAL)
+ENV LOG_LEVEL INFO
+
 # Set the working directory in the container to /app
 WORKDIR /app
 
