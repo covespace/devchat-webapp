@@ -11,6 +11,7 @@ def setup_logger():
     log_level = getattr(logging, log_level_str.upper(), logging.INFO)
     logger = logging.getLogger()
     logger.setLevel(log_level)
+    logger.info(f"Log level set to {log_level_str} ({log_level})")
 
     # Create console handler with a higher log level
     ch = logging.StreamHandler()
