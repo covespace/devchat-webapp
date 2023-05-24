@@ -7,14 +7,8 @@ from sqlalchemy.orm import Session
 from webapp.model.database import Database
 from webapp.utils import get_logger
 
-DATABASE_NAME = "postgres"
 
 logger = get_logger(__name__)
-
-
-def get_db() -> Session:
-    with database.get_session() as db:
-        yield db
 
 
 def get_database_url() -> str:
@@ -36,6 +30,7 @@ def get_database_url() -> str:
     # If the environment variable is not set, get the database URL from AWS Secrets Manager
     secret_name = "pg-1"
     region_name = "ap-southeast-1"
+    db_name = "devchat"
 
     # Create a Secrets Manager client
     session = boto3.session.Session()
@@ -57,7 +52,7 @@ def get_database_url() -> str:
     secret_dict = json.loads(get_secret_value_response['SecretString'])
 
     db_url = f"postgresql://{secret_dict['username']}:{secret_dict['password']}@" \
-             f"{secret_dict['host']}:{secret_dict['port']}/{DATABASE_NAME}"
+             f"{secret_dict['host']}:{secret_dict['port']}/{db_name}"
 
     if db_url is None:
         raise ValueError("Unable to get the database URL")
@@ -67,3 +62,8 @@ def get_database_url() -> str:
 
 
 database = Database(get_database_url())
+
+
+def get_db() -> Session:
+    with database.get_session() as db:
+        yield db
