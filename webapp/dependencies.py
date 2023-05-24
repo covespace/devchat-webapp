@@ -1,11 +1,13 @@
-import os
+import json
 import logging
+import os
 
 import boto3
 from sqlalchemy.orm import Session
 
 from webapp.model.database import Database
 
+DATABASE_NAME = "postgres"
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +53,11 @@ def get_database_url() -> str:
         raise ValueError("Unable to get the secret from AWS Secrets Manager") from exc
 
     # Decrypts secret using the associated KMS key.
-    # Assuming the secret is a string
-    db_url = get_secret_value_response['SecretString']
+    # Assuming the secret is a string, we parse it as a JSON object
+    secret_dict = json.loads(get_secret_value_response['SecretString'])
+
+    db_url = f"postgresql://{secret_dict['username']}:{secret_dict['password']}@" \
+             f"{secret_dict['host']}:{secret_dict['port']}/{DATABASE_NAME}"
 
     if db_url is None:
         raise ValueError("Unable to get the database URL")
