@@ -29,13 +29,12 @@ public_pem = public_key.public_bytes(
 os.environ['JWT_PRIVATE_KEY'] = private_pem.decode('utf-8')
 os.environ['JWT_PUBLIC_KEY'] = public_pem.decode('utf-8')
 
+os.environ['DATABASE_URL'] = "postgresql://devchat:test@localhost:5432/devchat"
+
 
 @pytest.fixture(scope="function", name="database")
-def fixture_database(postgresql):
-    connection = f"postgresql+psycopg://{postgresql.info.user}:@{postgresql.info.host}:" \
-                 f"{postgresql.info.port}/{postgresql.info.dbname}"
-    db = Database(connection)
-    db.create_tables()
+def fixture_database():
+    db = Database(os.environ["DATABASE_URL"])
     with db.get_session() as session:
         yield session
     Base.metadata.drop_all(db.engine)
