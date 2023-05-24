@@ -10,9 +10,6 @@ class Database:
     def __init__(self, database_url: str):
         self.engine = create_engine(database_url)
         self.session_class = sessionmaker(bind=self.engine)
-
-    def create_tables(self):
-        """Create the tables in the database."""
         Base.metadata.create_all(self.engine)
 
     @contextmanager

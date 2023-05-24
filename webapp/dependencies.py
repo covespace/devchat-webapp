@@ -2,43 +2,17 @@ import os
 import logging
 
 import boto3
-from botocore.exceptions import ClientError
 from sqlalchemy.orm import Session
 
 from webapp.model.database import Database
 
-DATABASE = None
 
 logger = logging.getLogger(__name__)
 
 
-def get_database():
-    """
-    Get the database instance.
-    :return: the database instance
-    """
-    global DATABASE
-    if DATABASE is None:
-        db_url = get_database_url()
-        DATABASE = Database(db_url)
-    return DATABASE
-
-
-def init_tables():
-    """
-    Initialize the database tables.
-    """
-    db = get_database()
-    return db.create_tables()
-
-
 def get_db() -> Session:
-    global DATABASE
-    if DATABASE is None:
-        db_url = get_database_url()
-        DATABASE = Database(db_url)
-    with DATABASE.get_session() as session:
-        yield session
+    with database.get_session() as db:
+        yield db
 
 
 def get_database_url() -> str:
@@ -72,16 +46,19 @@ def get_database_url() -> str:
         get_secret_value_response = client.get_secret_value(
             SecretId=secret_name
         )
-    except ClientError as e:
+    except Exception as exc:
         # Raise an exception if unable to get the secret
-        raise Exception("Unable to get the secret from AWS Secrets Manager") from e
+        raise ValueError("Unable to get the secret from AWS Secrets Manager") from exc
 
     # Decrypts secret using the associated KMS key.
     # Assuming the secret is a string
     db_url = get_secret_value_response['SecretString']
 
     if db_url is None:
-        raise Exception("Unable to get the database URL")
+        raise ValueError("Unable to get the database URL")
 
     logger.info("Got database URL from AWS Secrets Manager")
     return db_url
+
+
+database = Database(get_database_url())
