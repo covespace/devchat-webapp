@@ -1,15 +1,15 @@
 import json
-import logging
 import os
 
 import boto3
 from sqlalchemy.orm import Session
 
 from webapp.model.database import Database
+from webapp.utils import get_logger
 
 DATABASE_NAME = "postgres"
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def get_db() -> Session:

@@ -1,10 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from webapp import logger
 from webapp.api.routers import router
 
-logger.setup_logger()
 
 app = FastAPI(title="DevChat Webapp", version="0.1.0")
 

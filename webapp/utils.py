@@ -3,6 +3,7 @@ utils.py contains utility functions that are used throughout the webapp.
 """
 from datetime import datetime
 import hashlib
+import logging
 import os
 import uuid
 import jwt
@@ -70,3 +71,30 @@ def send_email(from_email: str, from_name: str, to_email: str,
         print("Status code:", response.status_code)
     except Exception as exc:
         print("Error sending email:", exc)
+
+
+def get_logger(name: str = None) -> logging.Logger:
+    logger = logging.getLogger(name)
+
+    # Default to 'INFO' if 'LOG_LEVEL' env var is not set
+    log_level_str = os.getenv('LOG_LEVEL')
+    if not log_level_str:
+        log_level = logging.INFO
+    else:
+        log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+
+    logger.setLevel(log_level)
+
+    # Create console handler with a higher log level
+    handler = logging.StreamHandler()
+    handler.setLevel(log_level)
+
+    # Create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+
+    # Add the handlers to the logger
+    logger.addHandler(handler)
+
+    logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
+    return logger
