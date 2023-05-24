@@ -41,7 +41,7 @@ if __name__ == "__main__":
            -e DATABASE_URL="postgresql://postgres:mysecretpassword@<POSTGRES_IP_ADDRESS>:5432/postgres" your-image-name`
     2. In non-container-based environments:
         1. Set the DATABASE_URL environment variable:
-        `export DATABASE_URL = "postgresql://postgres:mysecretpassword@localhost:5432/postgres"`
+        `export DATABASE_URL="postgresql://postgres:mysecretpassword@localhost:5432/postgres"`
         or in Python:
         `os.environ["DATABASE_URL"] = "postgresql://postgres:mysecretpassword@localhost:5432/postgres"`
         

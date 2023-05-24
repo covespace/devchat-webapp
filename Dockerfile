@@ -4,6 +4,9 @@ FROM python:3.9-slim-buster
 # Set log level. (INFO, DEBUG, WARNING, ERROR, CRITICAL)
 ENV LOG_LEVEL INFO
 
+# Set the PYTHONPATH environment variable
+ENV PYTHONPATH="${PYTHONPATH}:/app"
+
 # Set the working directory in the container to /app
 WORKDIR /app
 
@@ -23,4 +26,4 @@ COPY ./webapp ./webapp
 EXPOSE 80
 
 # Run the application when the container launches
-CMD ["uvicorn", "webapp.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["python", "webapp/main.py"]
