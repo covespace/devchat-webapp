@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from webapp import logger
-from webapp.api.routers import api_router
+from webapp.api.routers import router
 
 logger.setup_logger()
 
@@ -16,4 +16,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(api_router, prefix="/api")
+app.include_router(router)
