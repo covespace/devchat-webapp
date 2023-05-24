@@ -40,14 +40,19 @@ class User(Base):
 
     def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        while True:
-            unique_id = random.randint(10000000000, 99999999999)
-            if not db.query(User).filter(User.id == unique_id).first():
-                self.id = unique_id
-                if self.is_valid_email(self.email) and self.is_valid_username(self.username):
-                    db.add(self)
-                    db.commit()
+        if not self.is_valid_email(self.email):
+            raise ValueError("Invalid email provided.")
+        if not self.is_valid_username(self.username):
+            raise ValueError("Invalid username provided.")
+
+        with db.begin_nested():
+            while True:
+                unique_id = random.randint(10000000000, 99999999999)
+                if not db.query(User).filter(User.id == unique_id).first():
+                    self.id = unique_id
                     break
+            db.add(self)
+            db.commit()
 
     def __repr__(self):
         return f"<User(id={self.id}, username='{self.username}', email='{self.email}', " \

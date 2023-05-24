@@ -73,6 +73,12 @@ def test_create_user_duplicate_username(database):
         create_user(database, username, "anotheremail@example.com")
 
 
+def test_create_user_invalid_email(database):
+    with pytest.raises(ValueError) as error:
+        create_user(database, "testuser", "invalid_email")
+        assert str(error) == "Invalid email provided."
+
+
 def test_add_user_to_organization_success(database):
     org_name = "Test Organization"
     country_code = "USA"
