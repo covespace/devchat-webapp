@@ -11,3 +11,7 @@ disable=
     too-many-locals,
     too-many-branches,
     R0801
+
+[TYPECHECK]
+# List of members that should be ignored, separated by a comma.
+ignored-modules=pydantic

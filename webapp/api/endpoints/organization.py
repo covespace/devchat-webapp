@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, Body, Path
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -38,13 +38,32 @@ class UserResponse(BaseModel):
 
 
 @router.post("/organizations", response_model=OrganizationResponse)
-def create_org(name: str = Body(...), country_code: str = Body(...), db: Session = Depends(get_db)):
+async def create_org(name: str = Body(...), country_code: str = Body(...),
+                     db: Session = Depends(get_db)):
+    """
+    Create a new organization.
+
+    Args:
+        name (str): Name of the organization.
+        country_code (str): Country code of the organization.
+
+    Returns:
+        OrganizationResponse: The created organization object.
+    """
     return create_organization(db, name, country_code)
 
 
 @router.get("/{organization_id}/users", response_model=List[UserResponse])
-def list_users(organization_id: int, db: Session = Depends(get_db)):
-    users = get_users_of_organization(db, organization_id)
-    if not users:
-        raise HTTPException(status_code=404, detail="Organization not found")
-    return users
+async def list_users(
+        organization_id: int = Path(..., description="ID of the organization to list users for"),
+        db: Session = Depends(get_db)):
+    """
+    List all users of an organization.
+
+    Args:
+        organization_id (int): The ID of the organization.
+
+    Returns:
+        List[UserResponse]: A list of users belonging to the organization.
+    """
+    return get_users_of_organization(db, organization_id)
