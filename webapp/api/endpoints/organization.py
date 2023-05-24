@@ -53,7 +53,7 @@ async def create_org(name: str = Body(...), country_code: str = Body(...),
     return create_organization(db, name, country_code)
 
 
-@router.get("/{organization_id}/users", response_model=List[UserResponse])
+@router.get("/organizations/{organization_id}/users", response_model=List[UserResponse])
 async def list_users(
         organization_id: int = Path(..., description="ID of the organization to list users for"),
         db: Session = Depends(get_db)):
