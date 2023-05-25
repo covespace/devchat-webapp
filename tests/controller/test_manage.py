@@ -101,8 +101,9 @@ def test_add_user_to_organization_success(database):
 
 
 def test_add_user_to_organization_invalid_ids(database):
-    result = add_user_to_organization(database, 999, 999)
-    assert result is False
+    with pytest.raises(ValueError) as error:
+        add_user_to_organization(database, 999, 999)
+        assert str(error) == "User or organization does not exist."
 
 
 def test_add_user_to_organization_with_role(database):
@@ -229,5 +230,6 @@ def test_revoke_key_success(database):
 
 
 def test_revoke_key_invalid_id(database):
-    result = revoke_access_key(database, 999)
-    assert result is False
+    with pytest.raises(ValueError) as error:
+        revoke_access_key(database, 999)
+        assert str(error) == "Key does not exist."

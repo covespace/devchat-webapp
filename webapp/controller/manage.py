@@ -60,7 +60,7 @@ def create_user(db: Session, username: str, email: str,
 
 
 def add_user_to_organization(db: Session, user_id: int, organization_id: int,
-                             role: Role = Role.MEMBER) -> bool:
+                             role: Role = Role.MEMBER):
     """
     Add an existing user to an organization.
 
@@ -89,10 +89,10 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int,
             db.rollback()
             raise exc
     else:
-        return False
+        raise ValueError("User or organization does not exist.")
 
 
-def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: Role) -> bool:
+def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: Role):
     user_organization = (
         db.query(organization_user)
         .filter(organization_user.c.user_id == user_id)
@@ -114,11 +114,11 @@ def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: R
             db.rollback()
             raise exc
     else:
-        return False
+        raise ValueError("No such user in organization.")
 
 
 def create_access_key(db: Session, user_id: int, organization_id: int,
-                      name: str, region: str = None) -> AccessKey:
+                      name: str = None, region: str = None) -> AccessKey:
     """
     Create a new access key for a user.
 
@@ -147,7 +147,7 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
         raise exc
 
 
-def revoke_access_key(db: Session, key_id: int) -> bool:
+def revoke_access_key(db: Session, key_id: int):
     """
     Revoke an access key by setting its revoke_time.
 
@@ -168,4 +168,4 @@ def revoke_access_key(db: Session, key_id: int) -> bool:
             db.rollback()
             raise exc
     else:
-        return False
+        raise ValueError("Key does not exist.")
