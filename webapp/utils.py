@@ -1,11 +1,14 @@
 """
 utils.py contains utility functions that are used throughout the webapp.
 """
+import json
 from datetime import datetime
 import hashlib
 import logging
 import os
 import uuid
+
+import boto3
 import jwt
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
@@ -98,3 +101,47 @@ def get_logger(name: str = None) -> logging.Logger:
 
     logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
     return logger
+
+
+def get_jwt_public_key() -> str:
+    """
+    Get the RSA public key from environment variables.
+    """
+    return get_secret_from_aws_secrets_manager('JWT_PUBLIC_KEY', 'JWT_PUBLIC_KEY')
+
+
+def get_jwt_private_key() -> str:
+    """
+    Get the RSA private key from environment variables.
+    """
+    return get_secret_from_aws_secrets_manager('JWT_PRIVATE_KEY', 'JWT_PRIVATE_KEY')
+
+
+def get_secret_from_aws_secrets_manager(secret_name: str, key_name: str) -> str:
+    """
+    Get a secret from AWS Secrets Manager.
+    """
+
+    region_name = "ap-southeast-1"
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(
+        service_name='secretsmanager',
+        region_name=region_name
+    )
+
+    try:
+        get_secret_value_response = client.get_secret_value(
+            SecretId=secret_name
+        )
+    except Exception as exc:
+        # Raise an exception if unable to get the secret
+        raise ValueError("Unable to get the secret from AWS Secrets Manager") from exc
+
+    # Decrypts secret using the associated KMS key.
+    # Assuming the secret is a string, we parse it as a JSON object
+    secret_dict = json.loads(get_secret_value_response['SecretString'])
+
+    if key_name not in secret_dict:
+        raise ValueError("Unable to get the secret from AWS Secrets Manager")
+    return secret_dict[key_name]
