@@ -19,7 +19,8 @@ class CreateUserResponse(BaseModel):
     user_id: int
 
 
-@router.post("/users", response_model=CreateUserResponse, status_code=201, responses={400: {"model": ErrorResponse}})
+@router.post("/users", response_model=CreateUserResponse, status_code=201,
+             responses={400: {"model": ErrorResponse}})
 async def create_user_endpoint(user: CreateUserRequest, db: Session = Depends(get_db)):
     """
     Create a new user.
