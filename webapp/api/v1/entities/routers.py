@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
-from .organization import router as organization_router
+from .organizations import router as organizations_router
+from .users import router as users_router
 
 router = APIRouter()
 
-router.include_router(organization_router)
+router.include_router(organizations_router)
+router.include_router(users_router)
