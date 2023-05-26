@@ -66,5 +66,5 @@ class User(Base):
 
     @staticmethod
     def is_valid_username(username):
-        username_regex = r'^[a-zA-Z0-9][a-zA-Z0-9-]{0,38}$'
+        username_regex = r'^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,37}[a-zA-Z0-9]$'
         return re.match(username_regex, username) is not None

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from webapp.controller import create_user
 from webapp.dependencies import get_db
-from webapp.api.v1.error import ErrorResponse
+
 
 router = APIRouter()
 
@@ -19,8 +19,7 @@ class CreateUserResponse(BaseModel):
     user_id: int
 
 
-@router.post("/users", response_model=CreateUserResponse, status_code=201,
-             responses={400: {"model": ErrorResponse}})
+@router.post("/users", response_model=CreateUserResponse, status_code=201)
 async def create_user_endpoint(user: CreateUserRequest, db: Session = Depends(get_db)):
     """
     Create a new user.

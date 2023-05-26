@@ -1,12 +1,17 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Body, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from webapp.controller import add_user_to_organization
+from webapp.controller import create_access_key
 from webapp.controller import create_organization
 from webapp.controller import get_users_of_organization
 from webapp.dependencies import get_db
+from webapp.model import Role
+from webapp.utils import send_email
+
 
 router = APIRouter()
 
@@ -42,17 +47,86 @@ class UserResponse(BaseModel):
     email: str
 
 
-@router.get("/organizations/{organization_id}/users", response_model=List[UserResponse])
+@router.get("/organizations/{org_id}/users", response_model=List[UserResponse])
 async def list_users_endpoint(
-        organization_id: int = Path(..., description="ID of the organization to list users for"),
+        org_id: int = Path(..., description="ID of the organization to list users for"),
         db: Session = Depends(get_db)):
     """
     List all users of an organization.
 
     Args:
-        organization_id (int): The ID of the organization.
+        org_id (int): The ID of the organization.
 
     Returns:
         List[UserResponse]: A list of users belonging to the organization.
     """
-    return get_users_of_organization(db, organization_id)
+    return get_users_of_organization(db, org_id)
+
+
+class AddUserRequest(BaseModel):
+    user_id: int
+    role: str
+
+
+class AddUserResponse(BaseModel):
+    message: str
+
+
+@router.post("/organizations/{org_id}/users", response_model=AddUserResponse, status_code=200)
+async def add_user_to_organization_endpoint(
+        org_id: int = Path(..., description="ID of the organization to add the user to"),
+        user: AddUserRequest = Body(...),
+        db: Session = Depends(get_db)):
+    """
+    Add a user with a role to an organization.
+
+    Args:
+        org_id (int): The ID of the organization.
+        user (AddUserRequest): The user data to add.
+
+    Returns:
+        AddUserResponse: The result of adding the user to the organization.
+    """
+    try:
+        add_user_to_organization(db, user.user_id, org_id, Role[user.role.upper()])
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return AddUserResponse(message="User added to the organization successfully.")
+
+
+class IssueAccessKeyResponse(BaseModel):
+    message: str
+    key_hash: str
+
+
+@router.post("/organizations/{org_id}/user/{user_id}/access_key",
+             response_model=IssueAccessKeyResponse, status_code=200)
+async def issue_access_key_endpoint(
+        org_id: int = Path(..., description="ID of the organization"),
+        user_id: int = Path(..., description="ID of the user"),
+        db: Session = Depends(get_db)):
+    """
+    Issue an access key for a user in an organization and send the key to the user by email.
+
+    Args:
+        org_id (int): The ID of the organization.
+        user_id (int): The ID of the user.
+
+    Returns:
+        IssueAccessKeyResponse: The result of issuing the access key.
+    """
+    try:
+        key, value = create_access_key(db, user_id, org_id)
+        # Send the access key to the user by email
+        status = send_email(from_email="hello@devchat.ai", from_name="DevChat Team",
+                            to_email=key.user.email,
+                            template_id="d-052755df2d614200b2343aabe018bc22",
+                            template_data={"access_key": value})
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if status != 202:
+        raise HTTPException(status_code=status,
+                            detail=f"Failed to send email to {key.user.email}.")
+    return IssueAccessKeyResponse(message="Access key issued and sent to the user by email.",
+                                  key_hash=key.key_hash)

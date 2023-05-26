@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy import String, BigInteger, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
-from webapp.utils import generate_access_key, hash_access_key
+from webapp.utils import hash_access_key
 from .database import Base
 
 
@@ -35,12 +35,8 @@ class AccessKey(Base):
     user = relationship("User", back_populates="access_keys")
     organization = relationship("Organization", back_populates="access_keys")
 
-    def __init__(self, *args, **kwargs):
-        region = kwargs.pop('region')  # Extract the 'region' value and remove it from kwargs
-        if region is None:
-            region = 'any'
+    def __init__(self, key: str, *args, region: str = 'any', **kwargs):
         super().__init__(*args, **kwargs)
-        key = generate_access_key(self.organization_id)
         self.key_hash = hash_access_key(key)
         self.prefix = f"dc-{region}-" + key[:4]
 
