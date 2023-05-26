@@ -6,7 +6,6 @@ from datetime import datetime
 import hashlib
 import logging
 import os
-import re
 import uuid
 
 import boto3
@@ -25,12 +24,7 @@ def generate_uuid(name: str) -> str:
     return str(dev_uuid)
 
 
-def generate_access_key(organization_id: str, region: str) -> str:
-    if not region:
-        region = 'any'
-    if not re.match(r'^[a-z0-9]{2,4}$', region):
-        raise ValueError("Invalid region")
-
+def generate_access_key(organization_id: str) -> str:
     # Load the RSA private key from environment variables
     private_key = os.environ['JWT_PRIVATE_KEY']
     payload = {
@@ -38,7 +32,7 @@ def generate_access_key(organization_id: str, region: str) -> str:
         'jti': str(uuid.uuid4())  # Add a unique identifier (UUID) to the payload
     }
     key = jwt.encode(payload, private_key, algorithm='RS256')
-    return f'dc-{region}-' + key
+    return 'dc-' + key
 
 
 def hash_access_key(key: str) -> str:
@@ -46,10 +40,8 @@ def hash_access_key(key: str) -> str:
 
 
 def verify_access_key(key: str) -> str:
-    pattern = r'^dc-[a-z0-9]{2,4}-'
-    if not re.match(pattern, key):
+    if not key or not key.startswith('dc-'):
         raise ValueError("Invalid access key prefix")
-    key = re.sub(pattern, '', key)
 
     # Load the RSA public key from environment variables
     public_key = os.environ['JWT_PUBLIC_KEY']

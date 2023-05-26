@@ -38,7 +38,7 @@ class AccessKey(Base):
     def __init__(self, key: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.key_hash = hash_access_key(key)
-        self.prefix = key[:12]
+        self.prefix = key[:10]
 
     def __repr__(self):
         return f"<AccessKey(id={self.id}, name='{self.name}', " \

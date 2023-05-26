@@ -173,8 +173,7 @@ def test_create_key_success(database):
     user = create_user(database, username, email)
 
     key_name = "Test Key"
-    region = "ae1"
-    key, _ = create_access_key(database, user.id, organization.id, key_name, region)
+    key, _ = create_access_key(database, user.id, organization.id, key_name)
 
     assert key.user_id == user.id
     assert key.organization_id == organization.id
@@ -190,22 +189,6 @@ def test_create_key_success(database):
     assert db_key.revoke_time is None
 
 
-def test_create_key_invalid_region(database):
-    org_name = "Test Organization"
-    country_code = "USA"
-    organization = create_organization(database, org_name, country_code)
-
-    username = "testuser"
-    email = "testuser@example.com"
-    user = create_user(database, username, email)
-
-    key_name = "Test Key"
-    invalid_region = "USA123"
-
-    with pytest.raises(ValueError):
-        create_access_key(database, user.id, organization.id, key_name, invalid_region)
-
-
 def test_revoke_key_success(database):
     org_name = "Test Organization"
     country_code = "USA"
@@ -216,8 +199,7 @@ def test_revoke_key_success(database):
     user = create_user(database, username, email)
 
     key_name = "Test Key"
-    region = "ae1"
-    key, _ = create_access_key(database, user.id, organization.id, key_name, region)
+    key, _ = create_access_key(database, user.id, organization.id, key_name)
 
     result = revoke_access_key(database, key.id)
 

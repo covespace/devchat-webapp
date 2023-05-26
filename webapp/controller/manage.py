@@ -119,7 +119,7 @@ def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: R
 
 
 def create_access_key(db: Session, user_id: int, organization_id: int,
-                      name: str = None, region: str = None) -> Tuple[AccessKey, str]:
+                      name: str = None) -> Tuple[AccessKey, str]:
     """
     Create a new access key for a user.
 
@@ -132,7 +132,7 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
     Returns:
         Tuple[AccessKey, str]: The created access key object and its value
     """
-    value = generate_access_key(organization_id, region)
+    value = generate_access_key(organization_id)
     key = AccessKey(value, user_id=user_id, organization_id=organization_id, name=name)
 
     try:
