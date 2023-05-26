@@ -1,11 +1,12 @@
 """
 management.py contains functions to create and update data in the database.
 """
+from typing import Tuple
 from sqlalchemy import insert
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user, Role
 from webapp.model import AccessKey
-from webapp.utils import now
+from webapp.utils import now, generate_access_key
 
 
 def create_organization(db: Session, name: str, country_code: str) -> Organization:
@@ -118,7 +119,7 @@ def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: R
 
 
 def create_access_key(db: Session, user_id: int, organization_id: int,
-                      name: str = None, region: str = None) -> AccessKey:
+                      name: str = None, region: str = None) -> Tuple[AccessKey, str]:
     """
     Create a new access key for a user.
 
@@ -129,19 +130,21 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
         region (str, optional): Region of the target service as the prefix of a key
 
     Returns:
-        AccessKey: The created access key object
+        Tuple[AccessKey, str]: The created access key object and its value
     """
     if region is not None:
         if len(region) < 2 or len(region) > 4:
             raise ValueError("Region must be 2 to 4 characters.")
 
-    key = AccessKey(user_id=user_id, organization_id=organization_id, name=name, region=region)
+    value = generate_access_key(organization_id)
+    key = AccessKey(value, user_id=user_id, organization_id=organization_id,
+                    name=name, region=region)
 
     try:
         db.add(key)
         db.commit()
         db.refresh(key)
-        return key
+        return (key, value)
     except Exception as exc:
         db.rollback()
         raise exc

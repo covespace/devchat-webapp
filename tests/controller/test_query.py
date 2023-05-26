@@ -69,8 +69,8 @@ def test_get_valid_keys_of_organization_success(database):
 
     add_user_to_organization(database, user.id, organization.id)
 
-    key1 = create_access_key(database, user.id, organization.id, "key1")
-    key2 = create_access_key(database, user.id, organization.id, "key2")
+    key1, _ = create_access_key(database, user.id, organization.id, "key1")
+    key2, _ = create_access_key(database, user.id, organization.id, "key2")
 
     valid_keys = get_valid_keys_of_organization(database, organization.id)
     valid_hashes = [key.key_hash for key in valid_keys]
@@ -91,8 +91,8 @@ def test_get_revoked_keys_in_time_range_success(database):
 
     add_user_to_organization(database, user.id, organization.id)
 
-    key1 = create_access_key(database, user.id, organization.id, 'key1')
-    key2 = create_access_key(database, user.id, organization.id, 'key2')
+    key1, _ = create_access_key(database, user.id, organization.id, 'key1')
+    key2, _ = create_access_key(database, user.id, organization.id, 'key2')
 
     revoke_access_key(database, key1.id)
 

@@ -174,7 +174,7 @@ def test_create_key_success(database):
 
     key_name = "Test Key"
     region = "US"
-    key = create_access_key(database, user.id, organization.id, key_name, region)
+    key, _ = create_access_key(database, user.id, organization.id, key_name, region)
 
     assert key.user_id == user.id
     assert key.organization_id == organization.id
@@ -217,7 +217,7 @@ def test_revoke_key_success(database):
 
     key_name = "Test Key"
     region = "US"
-    key = create_access_key(database, user.id, organization.id, key_name, region)
+    key, _ = create_access_key(database, user.id, organization.id, key_name, region)
 
     result = revoke_access_key(database, key.id)
 
