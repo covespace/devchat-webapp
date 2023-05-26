@@ -132,13 +132,8 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
     Returns:
         Tuple[AccessKey, str]: The created access key object and its value
     """
-    if region is not None:
-        if len(region) < 2 or len(region) > 4:
-            raise ValueError("Region must be 2 to 4 characters.")
-
-    value = generate_access_key(organization_id)
-    key = AccessKey(value, user_id=user_id, organization_id=organization_id,
-                    name=name, region=region)
+    value = generate_access_key(organization_id, region)
+    key = AccessKey(value, user_id=user_id, organization_id=organization_id, name=name)
 
     try:
         db.add(key)

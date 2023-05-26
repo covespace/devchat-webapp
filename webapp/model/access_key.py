@@ -35,10 +35,10 @@ class AccessKey(Base):
     user = relationship("User", back_populates="access_keys")
     organization = relationship("Organization", back_populates="access_keys")
 
-    def __init__(self, key: str, *args, region: str = 'any', **kwargs):
+    def __init__(self, key: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.key_hash = hash_access_key(key)
-        self.prefix = f"dc-{region}-" + key[:4]
+        self.prefix = key[:12]
 
     def __repr__(self):
         return f"<AccessKey(id={self.id}, name='{self.name}', " \
