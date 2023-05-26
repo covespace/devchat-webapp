@@ -16,6 +16,36 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Email, To
 
 
+def get_logger(name: str = None) -> logging.Logger:
+    local_logger = logging.getLogger(name)
+
+    # Default to 'INFO' if 'LOG_LEVEL' env var is not set
+    log_level_str = os.getenv('LOG_LEVEL')
+    if not log_level_str:
+        log_level = logging.INFO
+    else:
+        log_level = getattr(logging, log_level_str.upper(), logging.INFO)
+
+    local_logger.setLevel(log_level)
+
+    # Create console handler with a higher log level
+    handler = logging.StreamHandler()
+    handler.setLevel(log_level)
+
+    # Create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+
+    # Add the handlers to the logger
+    local_logger.addHandler(handler)
+
+    local_logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
+    return local_logger
+
+
+logger = get_logger(__name__)
+
+
 def generate_uuid(name: str) -> str:
     # Define a namespace for DevChat
     namespace = uuid.UUID('53835ae0-1173-3b91-34e6-ebcf3983edde')
@@ -24,34 +54,34 @@ def generate_uuid(name: str) -> str:
     return str(dev_uuid)
 
 
-def generate_access_key(organization_id: str) -> str:
-    # Load the RSA private key from environment variables
-    private_key = os.environ['JWT_PRIVATE_KEY']
+def generate_access_key(org_id: str) -> str:
+    # Load the HS256 secret key from environment variables
+    secret_key = _get_jwt_secrete_key()
     payload = {
-        'organization_id': organization_id,
-        'jti': str(uuid.uuid4())  # Add a unique identifier (UUID) to the payload
+        'org_id': org_id,
+        'jti': uuid.uuid4().bytes.decode('latin1')
     }
-    key = jwt.encode(payload, private_key, algorithm='RS256')
+    key = jwt.encode(payload, secret_key, algorithm='HS256')
     return 'dc-' + key
-
-
-def hash_access_key(key: str) -> str:
-    return hashlib.sha256(key.encode()).hexdigest()
 
 
 def verify_access_key(key: str) -> str:
     if not key or not key.startswith('dc-'):
         raise ValueError("Invalid access key prefix")
 
-    # Load the RSA public key from environment variables
-    public_key = os.environ['JWT_PUBLIC_KEY']
+    # Load the HS256 secret key from environment variables
+    secret_key = _get_jwt_secrete_key()
     try:
-        payload = jwt.decode(key, public_key, algorithms=['RS256'])
-        return payload['organization_id']
+        payload = jwt.decode(key, secret_key, algorithms=['HS256'])
+        return payload['org_id']
     except jwt.ExpiredSignatureError:
         return None
     except jwt.InvalidTokenError:
         return None
+
+
+def hash_access_key(key: str) -> str:
+    return hashlib.sha256(key.encode()).hexdigest()
 
 
 def now(db: Session) -> datetime:
@@ -70,62 +100,26 @@ def send_email(from_email: str, from_name: str, to_email: str,
     # Set the dynamic template data
     mail.dynamic_template_data = template_data
 
-    client = SendGridAPIClient(get_sendgrid_api_key())
+    client = SendGridAPIClient(_get_sendgrid_api_key())
     response = client.send(mail)
+    logger.info("Sent email of template %s to %s with status code %s",
+                template_id, to_email, response.status_code)
     return response.status_code
 
 
-def get_logger(name: str = None) -> logging.Logger:
-    logger = logging.getLogger(name)
-
-    # Default to 'INFO' if 'LOG_LEVEL' env var is not set
-    log_level_str = os.getenv('LOG_LEVEL')
-    if not log_level_str:
-        log_level = logging.INFO
-    else:
-        log_level = getattr(logging, log_level_str.upper(), logging.INFO)
-
-    logger.setLevel(log_level)
-
-    # Create console handler with a higher log level
-    handler = logging.StreamHandler()
-    handler.setLevel(log_level)
-
-    # Create formatter and add it to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-
-    # Add the handlers to the logger
-    logger.addHandler(handler)
-
-    logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
-    return logger
+def _get_jwt_secrete_key() -> str:
+    if 'JWT_SECRET_KEY' in os.environ:
+        return os.environ['JWT_SECRET_KEY']
+    return _get_secret_from_aws_secrets_manager('JWT', 'SECRET_KEY')
 
 
-def get_jwt_public_key() -> str:
-    """
-    Get the RSA public key from environment variables.
-    """
-    return get_secret_from_aws_secrets_manager('JWT_PUBLIC_KEY', 'JWT_PUBLIC_KEY')
-
-
-def get_jwt_private_key() -> str:
-    """
-    Get the RSA private key from environment variables.
-    """
-    return get_secret_from_aws_secrets_manager('JWT_PRIVATE_KEY', 'JWT_PRIVATE_KEY')
-
-
-def get_sendgrid_api_key() -> str:
-    """
-    Get the SendGrid API key from environment variables.
-    """
+def _get_sendgrid_api_key() -> str:
     if 'SENDGRID_API_KEY' in os.environ:
         return os.environ['SENDGRID_API_KEY']
-    return get_secret_from_aws_secrets_manager('SENDGRID', 'API_KEY')
+    return _get_secret_from_aws_secrets_manager('SENDGRID', 'API_KEY')
 
 
-def get_secret_from_aws_secrets_manager(secret_name: str, key_name: str) -> str:
+def _get_secret_from_aws_secrets_manager(secret_name: str, key_name: str) -> str:
     """
     Get a secret from AWS Secrets Manager.
     """

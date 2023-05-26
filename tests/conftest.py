@@ -2,32 +2,12 @@
 conftest.py contains global configurations that are available to all tests.
 """
 import os
-from cryptography.hazmat.primitives.asymmetric import rsa
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.backends import default_backend
+import secrets
 import pytest
 from webapp.model import Database, Base
 
-
-private_key = rsa.generate_private_key(
-    public_exponent=65537,
-    key_size=2048,
-    backend=default_backend()
-)
-public_key = private_key.public_key()
-
-private_pem = private_key.private_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PrivateFormat.PKCS8,
-    encryption_algorithm=serialization.NoEncryption()
-)
-public_pem = public_key.public_bytes(
-    encoding=serialization.Encoding.PEM,
-    format=serialization.PublicFormat.SubjectPublicKeyInfo
-)
-
-os.environ['JWT_PRIVATE_KEY'] = private_pem.decode('utf-8')
-os.environ['JWT_PUBLIC_KEY'] = public_pem.decode('utf-8')
+# Generate a 32-byte random secret key for HS256
+os.environ['JWT_SECRET_KEY'] = secrets.token_hex(32)
 
 if not os.getenv('DATABASE_URL'):
     # For local testing
