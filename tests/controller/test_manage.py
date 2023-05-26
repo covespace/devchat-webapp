@@ -8,6 +8,7 @@ from webapp.model import User
 from webapp.controller import create_user, add_user_to_organization, assign_role_to_user
 from webapp.model import AccessKey
 from webapp.controller import create_access_key, revoke_access_key
+from webapp.utils import verify_access_key
 
 
 def test_create_organization_success(database):
@@ -173,7 +174,7 @@ def test_create_key_success(database):
     user = create_user(database, username, email)
 
     key_name = "Test Key"
-    key, _ = create_access_key(database, user.id, organization.id, key_name)
+    key, value = create_access_key(database, user.id, organization.id, key_name)
 
     assert key.user_id == user.id
     assert key.organization_id == organization.id
@@ -187,6 +188,10 @@ def test_create_key_success(database):
     assert db_key.organization_id == organization.id
     assert db_key.name == key_name
     assert db_key.revoke_time is None
+
+    # Verify the generated access key
+    org_id_from_key = verify_access_key(value)
+    assert org_id_from_key == organization.id
 
 
 def test_revoke_key_success(database):

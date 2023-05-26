@@ -72,7 +72,7 @@ def verify_access_key(key: str) -> str:
     # Load the HS256 secret key from environment variables
     secret_key = _get_jwt_secrete_key()
     try:
-        payload = jwt.decode(key, secret_key, algorithms=['HS256'])
+        payload = jwt.decode(key[3:], secret_key, algorithms=['HS256'])
         return payload['org_id']
     except jwt.ExpiredSignatureError:
         return None
