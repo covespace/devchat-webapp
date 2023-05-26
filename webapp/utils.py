@@ -67,7 +67,7 @@ def send_email(from_email: str, from_name: str, to_email: str,
     # Set the dynamic template data
     mail.dynamic_template_data = template_data
 
-    client = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+    client = SendGridAPIClient(get_sendgrid_api_key())
     response = client.send(mail)
     return response.status_code
 
@@ -111,6 +111,15 @@ def get_jwt_private_key() -> str:
     Get the RSA private key from environment variables.
     """
     return get_secret_from_aws_secrets_manager('JWT_PRIVATE_KEY', 'JWT_PRIVATE_KEY')
+
+
+def get_sendgrid_api_key() -> str:
+    """
+    Get the SendGrid API key from environment variables.
+    """
+    if 'SENDGRID_API_KEY' in os.environ:
+        return os.environ['SENDGRID_API_KEY']
+    return get_secret_from_aws_secrets_manager('SENDGRID', 'API_KEY')
 
 
 def get_secret_from_aws_secrets_manager(secret_name: str, key_name: str) -> str:
