@@ -29,7 +29,7 @@ def _call_calculate_balances(database):
 
 
 def test_add_transactions_batch_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 

@@ -3,14 +3,29 @@ test_query.py contains tests for the query.py module.
 """
 import datetime
 from webapp.controller import create_organization, create_user, add_user_to_organization
-from webapp.controller import get_users_of_organization
+from webapp.controller import get_organization_id_by_name, get_users_of_organization
 from webapp.controller import create_access_key, revoke_access_key
 from webapp.controller import get_valid_keys_of_organization, get_revoked_key_hashes
 from webapp.utils import now
 
 
+def test_get_organization_id_by_name_success(database):
+    org_name = "Test-Organization"
+    country_code = "USA"
+    organization = create_organization(database, org_name, country_code)
+
+    org_id = get_organization_id_by_name(database, org_name)
+
+    assert organization.id == org_id
+
+
+def test_get_organization_id_by_name_no_org(database):
+    org_id = get_organization_id_by_name(database, "Nonexistent Organization")
+    assert org_id is None
+
+
 def test_get_users_of_organization_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -33,7 +48,7 @@ def test_get_users_of_organization_success(database):
 
 
 def test_get_users_of_organization_custom_columns(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -59,7 +74,7 @@ def test_get_users_of_organization_invalid_id(database):
 
 
 def test_get_valid_keys_of_organization_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -81,7 +96,7 @@ def test_get_valid_keys_of_organization_success(database):
 
 
 def test_get_revoked_keys_in_time_range_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 

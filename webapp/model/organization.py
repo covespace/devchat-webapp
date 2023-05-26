@@ -7,6 +7,7 @@ from sqlalchemy import Column, ForeignKey, Table, Enum as SqlEnum
 from sqlalchemy import String, Float, BigInteger, DateTime
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql.expression import func
+from webapp.utils import is_valid_user_name
 from .database import Base
 from .balance import Balance  # pylint: disable=unused-import
 from .payment import Payment  # pylint: disable=unused-import
@@ -55,13 +56,17 @@ class Organization(Base):
 
     def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        while True:
-            unique_id = random.randint(10000000000, 99999999999)
-            if not db.query(Organization).filter(Organization.id == unique_id).first():
-                self.id = unique_id
-                db.add(self)
-                db.commit()
-                break
+        if not is_valid_user_name(self.name):
+            raise ValueError("Invalid organization name provided.")
+
+        with db.begin_nested():
+            while True:
+                unique_id = random.randint(10000000000, 99999999999)
+                if not db.query(Organization).filter(Organization.id == unique_id).first():
+                    self.id = unique_id
+                    break
+            db.add(self)
+            db.commit()
 
     def __repr__(self):
         return f"<Organization(id={self.id}, name='{self.name}', " \
