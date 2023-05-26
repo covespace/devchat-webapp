@@ -20,3 +20,4 @@ def test_create_user_invalid_email(database):  # pylint: disable=W0613
         "email": "invalid_email"
     })
     assert response.status_code == 422
+    assert response.json()["detail"] == "Invalid email provided."
