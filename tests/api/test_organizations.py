@@ -95,7 +95,6 @@ def test_issue_access_key(database):  # pylint: disable=W0613
 
     # Issue an access key for the user in the organization
     response = client.post(f"/api/v1/organizations/{org_id}/user/{user_id}/access_key")
-    print(response.json())
     assert response.status_code == 200
     assert response.json()["message"] == "Access key issued and sent to the user by email."
     assert "key_hash" in response.json()

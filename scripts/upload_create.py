@@ -45,7 +45,7 @@ def add_user_to_organization(org_id: int, user_id: int, role: str):
 
 def issue_access_key(org_id: int, user_id: int):
     response = requests.post(
-        f"{API_BASE_URL}/ap1/vi/organizations/{org_id}/user/{user_id}/access_key",
+        f"{API_BASE_URL}/api/v1/organizations/{org_id}/user/{user_id}/access_key",
         timeout=10
     )
     return response.status_code == 200

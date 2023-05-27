@@ -36,7 +36,9 @@ def fixture_local_app():
 
 
 def test_process_file1(database, file1_path, local_app):  # pylint: disable=W0613
-    subprocess.run(["python", "scripts/upload_create.py", file1_path], check=True)
+    result = subprocess.run(["python", "scripts/upload_create.py", file1_path],
+                            stdout=subprocess.PIPE, text=True, check=True)
+    print(result.stdout)
 
     org_id = get_organization_id_by_name(database, 'covespace')
     assert org_id is not None
@@ -45,8 +47,12 @@ def test_process_file1(database, file1_path, local_app):  # pylint: disable=W061
 
 
 def test_process_file2(database, file1_path, file2_path, local_app):  # pylint: disable=W0613
-    subprocess.run(["python", "scripts/upload_create.py", file1_path], check=True)
-    subprocess.run(["python", "scripts/upload_create.py", file2_path], check=True)
+    result = subprocess.run(["python", "scripts/upload_create.py", file1_path],
+                            stdout=subprocess.PIPE, text=True, check=True)
+    print(result.stdout)
+    result = subprocess.run(["python", "scripts/upload_create.py", file2_path],
+                            stdout=subprocess.PIPE, text=True, check=True)
+    print(result.stdout)
 
     org1_id = get_organization_id_by_name(database, 'covespace')
     assert org1_id is not None
