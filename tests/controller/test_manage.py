@@ -12,7 +12,7 @@ from webapp.utils import verify_access_key
 
 
 def test_create_organization_success(database):
-    name = "Test Organization"
+    name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, name, country_code)
 
@@ -31,7 +31,7 @@ def test_create_organization_success(database):
 
 
 def test_create_organization_duplicate_name(database):
-    name = "Duplicate Organization"
+    name = "Duplicate-Organization"
     country_code = "US"
     create_organization(database, name, country_code)
 
@@ -81,7 +81,7 @@ def test_create_user_invalid_email(database):
 
 
 def test_add_user_to_organization_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -108,7 +108,7 @@ def test_add_user_to_organization_invalid_ids(database):
 
 
 def test_add_user_to_organization_with_role(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -139,7 +139,7 @@ def test_add_user_to_organization_with_role(database):
 
 
 def test_assign_role_to_user(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -165,7 +165,7 @@ def test_assign_role_to_user(database):
 
 
 def test_create_key_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 
@@ -195,7 +195,7 @@ def test_create_key_success(database):
 
 
 def test_revoke_key_success(database):
-    org_name = "Test Organization"
+    org_name = "Test-Organization"
     country_code = "USA"
     organization = create_organization(database, org_name, country_code)
 

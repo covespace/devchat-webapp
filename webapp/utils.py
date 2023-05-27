@@ -6,6 +6,7 @@ from datetime import datetime
 import hashlib
 import logging
 import os
+import re
 import uuid
 
 import boto3
@@ -63,6 +64,16 @@ def generate_access_key(org_id: str) -> str:
     }
     key = jwt.encode(payload, secret_key, algorithm='HS256')
     return 'dc-' + key
+
+
+def is_valid_email(email):
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(email_regex, email) is not None
+
+
+def is_valid_user_name(user_name):
+    name_regex = r'^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,37}[a-zA-Z0-9]$'
+    return re.match(name_regex, user_name) is not None
 
 
 def verify_access_key(key: str) -> str:

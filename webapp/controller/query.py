@@ -8,6 +8,22 @@ from webapp.model import Organization, User, organization_user
 from webapp.model import AccessKey
 
 
+def get_organization_id_by_name(db: Session, org_name: str) -> int:
+    """
+    Get the organization ID with the given name.
+
+    Args:
+        org_name (str): Name of the organization
+
+    Returns:
+        int: the organization ID with the given name
+    """
+    org_id = db.query(Organization.id).filter(Organization.name == org_name).first()
+    if org_id is None:
+        return None
+    return org_id[0]
+
+
 def get_users_of_organization(db: Session, organization_id: int,
                               columns: List[str] = None) -> List[list]:
     """

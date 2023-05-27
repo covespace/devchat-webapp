@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Path, Body, HTTPException
 from pydantic import BaseModel
@@ -8,6 +8,7 @@ from webapp.controller import add_user_to_organization
 from webapp.controller import create_access_key
 from webapp.controller import create_organization
 from webapp.controller import get_users_of_organization
+from webapp.controller import get_organization_id_by_name
 from webapp.dependencies import get_db
 from webapp.model import Role
 from webapp.utils import send_email
@@ -18,7 +19,7 @@ router = APIRouter()
 
 class CreateOrgRequest(BaseModel):
     name: str
-    country_code: str
+    country_code: Optional[str] = None
 
 
 class CreateOrgResponse(BaseModel):
@@ -37,8 +38,35 @@ async def create_organization_endpoint(org: CreateOrgRequest, db: Session = Depe
     Returns:
         CreateOrgResponse: The created organization object.
     """
-    org = create_organization(db, org.name, org.country_code)
+    try:
+        org = create_organization(db, org.name, org.country_code)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
     return CreateOrgResponse(message="Organization created successfully.", org_id=org.id)
+
+
+class GetOrgIdByNameResponse(BaseModel):
+    org_id: int
+
+
+@router.get("/organizations/{org_name}/id", response_model=GetOrgIdByNameResponse)
+async def get_organization_id_by_name_endpoint(
+        org_name: str = Path(..., description="Name of the organization to get the ID for"),
+        db: Session = Depends(get_db)):
+    """
+    Get the organization ID with the given name.
+
+    Args:
+        org_name (str): Name of the organization
+
+    Returns:
+        GetOrgIdByNameResponse: The organization ID with the given name
+    """
+    org_id = get_organization_id_by_name(db, org_name)
+    if org_id is None:
+        raise HTTPException(status_code=404, detail="Organization name not found")
+    return GetOrgIdByNameResponse(org_id=org_id)
 
 
 class UserResponse(BaseModel):
@@ -121,7 +149,7 @@ async def issue_access_key_endpoint(
         status = send_email(from_email="hello@devchat.ai", from_name="DevChat Team",
                             to_email=key.user.email,
                             template_id="d-052755df2d614200b2343aabe018bc22",
-                            template_data={"access_key": value})
+                            template_data={"user_name": key.user.email, "access_key": value})
     except Exception as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

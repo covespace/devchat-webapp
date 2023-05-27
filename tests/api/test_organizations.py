@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from webapp.controller import create_organization
 from webapp.main import app
 
 
@@ -6,16 +7,47 @@ client = TestClient(app)
 
 
 def test_create_organization(database):  # pylint: disable=W0613
-    response = client.post("/api/v1/organizations", json={"name": "Test Org", "country_code": "US"})
+    response = client.post("/api/v1/organizations", json={"name": "Test-Org"})
     assert response.status_code == 201
     assert response.json()["message"] == "Organization created successfully."
     assert "org_id" in response.json()
 
 
+def test_create_org_invalid_name(database):  # pylint: disable=W0613
+    invalid_org_name = "Invalid@Org#Name"
+    country_code = "US"
+
+    response = client.post(
+        "/api/v1/organizations",
+        json={"name": invalid_org_name, "country_code": country_code},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Invalid organization name provided."
+
+
+def test_get_organization_id_by_name_success(database):
+    org_name = "Test-Org"
+    country_code = "US"
+    organization = create_organization(database, org_name, country_code)
+
+    response = client.get(f"/api/v1/organizations/{org_name}/id")
+    assert response.status_code == 200
+    assert response.json()["org_id"] == organization.id
+
+
+def test_get_organization_id_by_name_not_found(database):  # pylint: disable=W0613
+    org_name = "Nonexistent-Org"
+
+    response = client.get(f"/api/v1/organizations/{org_name}/id")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Organization name not found"
+
+
 def test_list_users(database):  # pylint: disable=W0613
     # Create a test organization using the create_organization API
     org_response = client.post("/api/v1/organizations",
-                               json={"name": "Test Org", "country_code": "US"})
+                               json={"name": "Test-Org", "country_code": "US"})
     org_id = org_response.json()["org_id"]
 
     response = client.get(f"/api/v1/organizations/{org_id}/users")
@@ -33,7 +65,7 @@ def test_add_user_to_organization(database):  # pylint: disable=W0613
 
     # Create a test organization using the create_organization API
     org_response = client.post("/api/v1/organizations",
-                               json={"name": "Test Org", "country_code": "US"})
+                               json={"name": "Test-Org", "country_code": "US"})
     org_id = org_response.json()["org_id"]
 
     # Add the created user to the organization
@@ -54,7 +86,7 @@ def test_issue_access_key(database):  # pylint: disable=W0613
 
     # Create a test organization using the create_organization API
     org_response = client.post("/api/v1/organizations",
-                               json={"name": "Test Org", "country_code": "US"})
+                               json={"name": "Test-Org", "country_code": "US"})
     org_id = org_response.json()["org_id"]
 
     # Add the created user to the organization
