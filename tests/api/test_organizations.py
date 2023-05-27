@@ -7,10 +7,23 @@ client = TestClient(app)
 
 
 def test_create_organization(database):  # pylint: disable=W0613
-    response = client.post("/api/v1/organizations", json={"name": "Test-Org", "country_code": "US"})
+    response = client.post("/api/v1/organizations", json={"name": "Test-Org"})
     assert response.status_code == 201
     assert response.json()["message"] == "Organization created successfully."
     assert "org_id" in response.json()
+
+
+def test_create_org_invalid_name(database):  # pylint: disable=W0613
+    invalid_org_name = "Invalid@Org#Name"
+    country_code = "US"
+
+    response = client.post(
+        "/api/v1/organizations",
+        json={"name": invalid_org_name, "country_code": country_code},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Invalid organization name provided."
 
 
 def test_get_organization_id_by_name_success(database):

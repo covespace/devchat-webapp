@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Path, Body, HTTPException
 from pydantic import BaseModel
@@ -19,7 +19,7 @@ router = APIRouter()
 
 class CreateOrgRequest(BaseModel):
     name: str
-    country_code: str
+    country_code: Optional[str] = None
 
 
 class CreateOrgResponse(BaseModel):
@@ -38,7 +38,11 @@ async def create_organization_endpoint(org: CreateOrgRequest, db: Session = Depe
     Returns:
         CreateOrgResponse: The created organization object.
     """
-    org = create_organization(db, org.name, org.country_code)
+    try:
+        org = create_organization(db, org.name, org.country_code)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+
     return CreateOrgResponse(message="Organization created successfully.", org_id=org.id)
 
 

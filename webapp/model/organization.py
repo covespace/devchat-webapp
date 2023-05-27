@@ -45,7 +45,7 @@ class Organization(Base):
     name = Column(String, unique=True, nullable=False)
     balance = Column(Float, nullable=False, default=0)
     currency = Column(String, nullable=False, default='USD')
-    country_code = Column(String, nullable=False)
+    country_code = Column(String, nullable=True)
     create_time = Column(DateTime(timezone=True), nullable=False,
                          default=func.now())  # pylint: disable=E1102
 
