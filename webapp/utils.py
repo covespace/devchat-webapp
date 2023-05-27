@@ -6,7 +6,9 @@ from datetime import datetime
 import hashlib
 import logging
 import os
+import random
 import re
+import time
 import uuid
 
 import boto3
@@ -47,25 +49,6 @@ def get_logger(name: str = None) -> logging.Logger:
 logger = get_logger(__name__)
 
 
-def generate_uuid(name: str) -> str:
-    # Define a namespace for DevChat
-    namespace = uuid.UUID('53835ae0-1173-3b91-34e6-ebcf3983edde')
-    # Generate a UUID based on the name
-    dev_uuid = uuid.uuid5(namespace, name)
-    return str(dev_uuid)
-
-
-def generate_access_key(org_id: str) -> str:
-    # Load the HS256 secret key from environment variables
-    secret_key = _get_jwt_secrete_key()
-    payload = {
-        'org_id': org_id,
-        'jti': uuid.uuid4().bytes.decode('latin1')
-    }
-    key = jwt.encode(payload, secret_key, algorithm='HS256')
-    return 'dc-' + key
-
-
 def is_valid_email(email):
     email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     return re.match(email_regex, email) is not None
@@ -76,12 +59,37 @@ def is_valid_user_name(user_name):
     return re.match(name_regex, user_name) is not None
 
 
+def generate_uuid(name: str) -> str:
+    # Define a namespace for DevChat
+    namespace = uuid.UUID('53835ae0-1173-3b91-34e6-ebcf3983edde')
+    # Generate a UUID based on the name
+    dev_uuid = uuid.uuid5(namespace, name)
+    return str(dev_uuid)
+
+
+def generate_access_key(org_id: int) -> str:
+    # Load the HS256 secret key from environment variables
+    secret_key = _get_jwt_secret_key()
+
+    random_bits = random.getrandbits(32)
+    timestamp = int(time.time())
+    jti = (timestamp << 32) | random_bits
+
+    payload = {
+        'org_id': org_id,
+        'jti': jti
+    }
+
+    key = jwt.encode(payload, secret_key, algorithm='HS256')
+    return 'DC.' + key
+
+
 def verify_access_key(key: str) -> str:
-    if not key or not key.startswith('dc-'):
+    if not key or not key.startswith('DC.'):
         raise ValueError("Invalid access key prefix")
 
     # Load the HS256 secret key from environment variables
-    secret_key = _get_jwt_secrete_key()
+    secret_key = _get_jwt_secret_key()
     try:
         payload = jwt.decode(key[3:], secret_key, algorithms=['HS256'])
         return payload['org_id']
@@ -118,7 +126,7 @@ def send_email(from_email: str, from_name: str, to_email: str,
     return response.status_code
 
 
-def _get_jwt_secrete_key() -> str:
+def _get_jwt_secret_key() -> str:
     if 'JWT_SECRET_KEY' in os.environ:
         return os.environ['JWT_SECRET_KEY']
     return _get_secret_from_aws_secrets_manager('JWT', 'SECRET_KEY')
