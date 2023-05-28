@@ -11,7 +11,7 @@ os.environ['JWT_SECRET_KEY'] = secrets.token_hex(32)
 
 if not os.getenv('DATABASE_URL'):
     # For local testing
-    os.environ['DATABASE_URL'] = "postgresql://devchat:test@localhost:5432/devchat"
+    os.environ['DATABASE_URL'] = "postgresql://merico@localhost/devchat"
 
 
 @pytest.fixture(scope="function", name="database")
