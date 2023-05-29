@@ -24,7 +24,7 @@ def create_organization(org_name: str) -> int:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/organizations",
         json={"name": org_name, "country_code": "CN"},
-        timeout=15
+        timeout=20
     )
     if response.status_code != 201:
         logger.error("Failed to create organization %s", org_name)
@@ -38,7 +38,7 @@ def create_user(email: str) -> int:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/users",
         json={"username": username, "email": email},
-        timeout=15
+        timeout=20
     )
     if response.status_code != 201:
         logger.error("Failed to create user %s", email)
@@ -51,7 +51,7 @@ def add_user_to_organization(org_id: int, user_id: int, role: str) -> bool:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/organizations/{org_id}/users",
         json={"user_id": user_id, "role": role},
-        timeout=15
+        timeout=20
     )
     if response.status_code != 200:
         logger.error("Failed to add user %d to organization %d with role '%s'",
@@ -65,7 +65,7 @@ def add_user_to_organization(org_id: int, user_id: int, role: str) -> bool:
 def issue_access_key(org_id: int, user_id: int) -> bool:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/organizations/{org_id}/user/{user_id}/access_key",
-        timeout=15
+        timeout=20
     )
     if response.status_code != 200:
         logger.error("Failed to issue access key for user %d in organization %d",
@@ -78,7 +78,7 @@ def issue_access_key(org_id: int, user_id: int) -> bool:
 def check_existence(org_name: str, email: str) -> bool:
     response = requests.get(
         f"{API_BASE_URL}/api/v1/organizations/{org_name}/id",
-        timeout=15
+        timeout=20
     )
     if response.status_code != 200:
         return False
@@ -87,7 +87,7 @@ def check_existence(org_name: str, email: str) -> bool:
 
     response = requests.get(
         f"{API_BASE_URL}/api/v1/organizations/{org_id}/users",
-        timeout=15
+        timeout=20
     )
     if response.status_code != 200:
         logger.error("Failed to fetch users for organization %d", org_id)
@@ -105,11 +105,11 @@ def process_excel_file(file_path: str):
     workbook = openpyxl.load_workbook(file_path)
     sheet = workbook.active
 
-    for row in reversed(list(sheet.iter_rows(min_row=2))):
+    for row in sheet.iter_rows(min_row=2):
         org_name = sanitize_name(row[6].value)
         owner_email = row[7].value
         if check_existence(org_name, owner_email):
-            logger.info("Skipped row %d and lower", row[0].row)
+            logger.info("Skipped row %d and older rows", row[0].row)
             break
 
         logger.info("Processing row %d", row[0].row)
