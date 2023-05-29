@@ -3,6 +3,7 @@ management.py contains functions to create and update data in the database.
 """
 from typing import Tuple
 from sqlalchemy import insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user, Role
 from webapp.model import AccessKey
@@ -27,6 +28,9 @@ def create_organization(db: Session, name: str, country_code: str) -> Organizati
         db.commit()
         db.refresh(organization)
         return organization
+    except IntegrityError as error:
+        db.rollback()
+        raise ValueError("Organization name already exists.") from error
     except Exception as exc:
         db.rollback()
         raise exc
@@ -55,6 +59,9 @@ def create_user(db: Session, username: str, email: str,
         db.commit()
         db.refresh(user)
         return user
+    except IntegrityError as error:
+        db.rollback()
+        raise ValueError("Username already exists.") from error
     except Exception as exc:
         db.rollback()
         raise exc

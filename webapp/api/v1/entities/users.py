@@ -34,5 +34,7 @@ async def create_user_endpoint(user: CreateUserRequest, db: Session = Depends(ge
         user = create_user(db, user.username, user.email)
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
     return CreateUserResponse(message="User created successfully.", user_id=user.id)
