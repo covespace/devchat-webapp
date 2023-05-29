@@ -50,9 +50,36 @@ def test_list_users(database):  # pylint: disable=W0613
                                json={"name": "Test-Org", "country_code": "US"})
     org_id = org_response.json()["org_id"]
 
+    # Test case: No users in the organization
     response = client.get(f"/api/v1/organizations/{org_id}/users")
     assert response.status_code == 200
     assert isinstance(response.json(), list)
+    assert len(response.json()) == 0
+
+    # Test case: Users exist in the organization
+    # Add users to the organization using the add_user API
+    user1 = {"username": "User1", "email": "user1@example.com"}
+    user2 = {"username": "User2", "email": "user2@example.com"}
+    response1 = client.post("/api/v1/users", json=user1)
+    response2 = client.post("/api/v1/users", json=user2)
+    user1_id = response1.json()["user_id"]
+    user2_id = response2.json()["user_id"]
+
+    # Add the created users to the organization
+    response1 = client.post(f"/api/v1/organizations/{org_id}/users",
+                            json={"user_id": user1_id, "role": "owner"})
+    response2 = client.post(f"/api/v1/organizations/{org_id}/users",
+                            json={"user_id": user2_id, "role": "member"})
+    assert response1.status_code == 200
+    assert response2.status_code == 200
+
+    response = client.get(f"/api/v1/organizations/{org_id}/users")
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[0]["username"] == "User1"
+    assert response.json()[0]["email"] == "user1@example.com"
+    assert response.json()[1]["username"] == "User2"
+    assert response.json()[1]["email"] == "user2@example.com"
 
 
 def test_add_user_to_organization(database):  # pylint: disable=W0613

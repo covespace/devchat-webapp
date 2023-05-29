@@ -72,7 +72,7 @@ async def get_organization_id_by_name_endpoint(
 
 
 class UserResponse(BaseModel):
-    user_id: int
+    id: int
     username: str
     email: str
 
@@ -90,7 +90,8 @@ async def list_users_endpoint(
     Returns:
         List[UserResponse]: A list of users belonging to the organization.
     """
-    return get_users_of_organization(db, org_id)
+    users = get_users_of_organization(db, org_id)
+    return users
 
 
 class AddUserRequest(BaseModel):

@@ -40,7 +40,8 @@ def get_users_of_organization(db: Session, organization_id: int,
     if columns is None:
         columns = ['id', 'username', 'email']
 
-    users = db.query(User).with_entities(*[getattr(User, column).label(column) for column in columns]). \
+    users = db.query(User).with_entities(
+        *[getattr(User, column).label(column) for column in columns]). \
         join(organization_user). \
         join(Organization). \
         filter(Organization.id == organization_id).all()
