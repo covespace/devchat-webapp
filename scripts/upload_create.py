@@ -9,6 +9,10 @@ import requests
 
 API_BASE_URL = os.environ.get('API_BASE_URL', 'http://localhost:8000')
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 
@@ -20,12 +24,12 @@ def create_organization(org_name: str) -> int:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/organizations",
         json={"name": org_name, "country_code": "CN"},
-        timeout=10
+        timeout=15
     )
     if response.status_code != 201:
         logger.error("Failed to create organization %s", org_name)
         return None
-    logger.info("Created organization %s", org_name)
+    logger.info("Successfully created organization %s", org_name)
     return response.json()["org_id"]
 
 
@@ -34,12 +38,12 @@ def create_user(email: str) -> int:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/users",
         json={"username": username, "email": email},
-        timeout=10
+        timeout=15
     )
     if response.status_code != 201:
         logger.error("Failed to create user %s", email)
         return None
-    logger.info("Created user %s", email)
+    logger.info("Successfully created user %s", email)
     return response.json()["user_id"]
 
 
@@ -47,13 +51,13 @@ def add_user_to_organization(org_id: int, user_id: int, role: str) -> bool:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/organizations/{org_id}/users",
         json={"user_id": user_id, "role": role},
-        timeout=10
+        timeout=15
     )
     if response.status_code != 200:
-        logger.error("Failed to add user %d to organization %d with role %s",
+        logger.error("Failed to add user %d to organization %d with role '%s'",
                      user_id, org_id, role)
         return False
-    logger.info("Added user %d to organization %d with role %s",
+    logger.info("Successfully added user %d to organization %d with role '%s'",
                 user_id, org_id, role)
     return True
 
@@ -61,20 +65,20 @@ def add_user_to_organization(org_id: int, user_id: int, role: str) -> bool:
 def issue_access_key(org_id: int, user_id: int) -> bool:
     response = requests.post(
         f"{API_BASE_URL}/api/v1/organizations/{org_id}/user/{user_id}/access_key",
-        timeout=10
+        timeout=15
     )
     if response.status_code != 200:
         logger.error("Failed to issue access key for user %d in organization %d",
                      user_id, org_id)
         return False
-    logger.info("Issued access key for user %d in organization %d", user_id, org_id)
+    logger.info("Successfully issued access key for user %d in organization %d", user_id, org_id)
     return True
 
 
 def check_existence(org_name: str, email: str) -> bool:
     response = requests.get(
         f"{API_BASE_URL}/api/v1/organizations/{org_name}/id",
-        timeout=10
+        timeout=15
     )
     if response.status_code != 200:
         return False
@@ -83,7 +87,7 @@ def check_existence(org_name: str, email: str) -> bool:
 
     response = requests.get(
         f"{API_BASE_URL}/api/v1/organizations/{org_id}/users",
-        timeout=10
+        timeout=15
     )
     if response.status_code != 200:
         logger.error("Failed to fetch users for organization %d", org_id)
@@ -105,7 +109,10 @@ def process_excel_file(file_path: str):
         org_name = sanitize_name(row[6].value)
         owner_email = row[7].value
         if check_existence(org_name, owner_email):
-            continue
+            logger.info("Skipped row %d and lower", row[0].row)
+            break
+
+        logger.info("Processing row %d", row[0].row)
 
         org_id = create_organization(org_name)
         if org_id is None:
