@@ -43,8 +43,8 @@ def test_get_users_of_organization_success(database):
     users = get_users_of_organization(database, organization.id)
 
     assert len(users) == 2
-    assert [user1.id, username1, email1] in users
-    assert [user2.id, username2, email2] in users
+    assert {"id": user1.id, "username": username1, "email": email1} in users
+    assert {"id": user2.id, "username": username2, "email": email2} in users
 
 
 def test_get_users_of_organization_custom_columns(database):
@@ -65,7 +65,7 @@ def test_get_users_of_organization_custom_columns(database):
                                       organization.id, columns=['id', 'location', 'company'])
 
     assert len(users) == 1
-    assert [user.id, location, company] in users
+    assert {'id': user.id, 'location': location, 'company': company} in users
 
 
 def test_get_users_of_organization_invalid_id(database):

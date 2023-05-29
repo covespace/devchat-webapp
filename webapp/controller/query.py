@@ -2,7 +2,7 @@
 query.py contains functions to query the database.
 """
 from datetime import datetime
-from typing import List
+from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user
 from webapp.model import AccessKey
@@ -25,7 +25,7 @@ def get_organization_id_by_name(db: Session, org_name: str) -> int:
 
 
 def get_users_of_organization(db: Session, organization_id: int,
-                              columns: List[str] = None) -> List[list]:
+                              columns: List[str] = None) -> List[Dict[str, Any]]:
     """
     Get all users of an organization.
 
@@ -34,17 +34,18 @@ def get_users_of_organization(db: Session, organization_id: int,
         columns (list, optional): List of columns to return. Default is ['id', 'username', 'email'].
 
     Returns:
-        list: List of lists containing user information.
-            Each inner list contains user data in the same order as the input or default columns.
+        list: List of dictionaries containing user information.
+            Each dictionary contains user data with keys matching the input or default columns.
     """
     if columns is None:
         columns = ['id', 'username', 'email']
 
-    users = db.query(User).with_entities(*[getattr(User, column) for column in columns]). \
+    users = db.query(User).with_entities(*[getattr(User, column).label(column) for column in columns]). \
         join(organization_user). \
         join(Organization). \
         filter(Organization.id == organization_id).all()
-    return [list(user) for user in users]
+
+    return [row._asdict() for row in users]
 
 
 def get_valid_keys_of_organization(db: Session, organization_id: int) -> List[AccessKey]:
