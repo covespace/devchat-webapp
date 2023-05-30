@@ -24,7 +24,7 @@ class AccessKey(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String, nullable=True)
-    key_hash = Column(String, nullable=False)
+    key_hash = Column(String, nullable=False, unique=True)
     thumbnail = Column(String, nullable=False)
     create_time = Column(DateTime(timezone=True), nullable=False,
                          default=func.now())  # pylint: disable=E1102

@@ -80,6 +80,23 @@ def get_revoked_key_hashes(db: Session, start_time: datetime, end_time: datetime
     return [key_hash[0] for key_hash in revoked_keys]
 
 
+def login_by_key_hash(db: Session, key_hash: str) -> Optional[int]:
+    """
+    Get the user ID associated with the given hash key.
+
+    Args:
+        db (Session): Database session.
+        key_hash (str): Hash key to search for.
+
+    Returns:
+        Optional[int]: User ID associated with the hash key, or None if not found.
+    """
+    access_key = db.query(AccessKey).filter(AccessKey.key_hash == key_hash).first()
+    if access_key is not None:
+        return access_key.user_id
+    return None
+
+
 def get_user_profile(db: Session, user_id: int) -> Optional[Dict[str, str]]:
     user = db.query(User).filter(User.id == user_id).first()
     if user is not None:
