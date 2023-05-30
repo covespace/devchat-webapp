@@ -2,7 +2,7 @@
 query.py contains functions to query the database.
 """
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user
 from webapp.model import AccessKey
@@ -24,27 +24,27 @@ def get_organization_id_by_name(db: Session, org_name: str) -> int:
     return org_id[0]
 
 
-def get_users_of_organization(db: Session, organization_id: int,
+def get_users_of_organization(db: Session, org_id: int,
                               columns: List[str] = None) -> List[Dict[str, Any]]:
     """
     Get all users of an organization.
 
     Args:
-        organization_id (int): Unique ID of the organization
-        columns (list, optional): List of columns to return. Default is ['id', 'username', 'email'].
+        org_id (int): Unique ID of the organization
+        columns (list, optional): List of user columns to return.
+            Default is ['id', 'username', 'email'].
 
     Returns:
         list: List of dictionaries containing user information.
-            Each dictionary contains user data with keys matching the input or default columns.
+            Each dictionary contains user data with keys matching the specified columns.
     """
-    if columns is None:
+    if not columns:
         columns = ['id', 'username', 'email']
 
     users = db.query(User).with_entities(
         *[getattr(User, column).label(column) for column in columns]). \
         join(organization_user). \
-        join(Organization). \
-        filter(Organization.id == organization_id).all()
+        filter(organization_user.c.organization_id == org_id).all()
 
     return [row._asdict() for row in users]
 
@@ -78,3 +78,41 @@ def get_revoked_key_hashes(db: Session, start_time: datetime, end_time: datetime
     revoked_keys = db.query(AccessKey.key_hash). \
         filter(AccessKey.revoke_time >= start_time, AccessKey.revoke_time < end_time).all()
     return [key_hash[0] for key_hash in revoked_keys]
+
+
+def get_user_profile(db: Session, user_id: int) -> Optional[Dict[str, str]]:
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is not None:
+        return {"username": user.username, "email": user.email}
+    return None
+
+
+def get_organizations_of_user(db: Session, user_id: int,
+                              columns: List[str] = None) -> List[Dict[str, Any]]:
+    """
+    Get all organizations of a user.
+
+    Args:
+        user_id (int): Unique ID of the user
+        columns (list, optional): List of organization and organization_user columns to return.
+                                  Default is ['id', 'name', 'role'].
+
+    Returns:
+        list: List of dictionaries containing organization information.
+            Each dictionary contains organization data with keys matching the specified columns.
+    """
+    if not columns:
+        columns = ['id', 'name', 'role']
+
+    selected_columns = []
+    for column in columns:
+        if hasattr(Organization, column):
+            selected_columns.append(getattr(Organization, column).label(column))
+        elif hasattr(organization_user.c, column):
+            selected_columns.append(getattr(organization_user.c, column).label(column))
+
+    user_orgs = db.query(Organization).with_entities(*selected_columns). \
+        join(organization_user). \
+        filter(organization_user.c.user_id == user_id).all()
+
+    return [row._asdict() for row in user_orgs]

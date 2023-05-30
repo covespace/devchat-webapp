@@ -6,6 +6,7 @@ from webapp.controller import create_organization, create_user, add_user_to_orga
 from webapp.controller import get_organization_id_by_name, get_users_of_organization
 from webapp.controller import create_access_key, revoke_access_key
 from webapp.controller import get_valid_keys_of_organization, get_revoked_key_hashes
+from webapp.controller import get_user_profile, get_organizations_of_user
 from webapp.utils import now
 
 
@@ -130,3 +131,64 @@ def test_get_revoked_keys_in_time_range_no_keys(database):
     revoked_keys = get_revoked_key_hashes(database, start_time, end_time)
 
     assert revoked_keys == []
+
+
+def test_get_user_profile_success(database):
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(database, username, email)
+
+    user_profile = get_user_profile(database, user.id)
+
+    assert user_profile == {"username": username, "email": email}
+
+
+def test_get_user_profile_invalid_id(database):
+    user_profile = get_user_profile(database, 999)
+
+    assert user_profile is None
+
+
+def test_get_organizations_of_user_success(database):
+    org_name1 = "Test-Organization1"
+    org_name2 = "Test-Organization2"
+    country_code = "USA"
+    organization1 = create_organization(database, org_name1, country_code)
+    organization2 = create_organization(database, org_name2, country_code)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(database, username, email)
+
+    add_user_to_organization(database, user.id, organization1.id, role="owner")
+    add_user_to_organization(database, user.id, organization2.id, role="member")
+
+    organizations = get_organizations_of_user(database, user.id)
+
+    assert len(organizations) == 2
+    assert {"id": organization1.id, "name": org_name1, "role": "owner"} in organizations
+    assert {"id": organization2.id, "name": org_name2, "role": "member"} in organizations
+
+
+def test_get_organizations_of_user_custom_columns(database):
+    org_name = "Test-Organization"
+    country = "USA"
+    organization = create_organization(database, org_name, country)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(database, username, email)
+
+    add_user_to_organization(database, user.id, organization.id, role="owner")
+
+    organizations = get_organizations_of_user(database, user.id,
+                                              columns=["id", "name", "country_code"])
+
+    assert len(organizations) == 1
+    assert {"id": organization.id, "name": org_name, "country_code": country} in organizations
+
+
+def test_get_organizations_of_user_invalid_id(database):
+    organizations = get_organizations_of_user(database, 999)
+
+    assert organizations == []
