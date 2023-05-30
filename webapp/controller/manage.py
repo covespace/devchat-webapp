@@ -134,7 +134,6 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
         user_id (int): Unique ID of the user
         organization_id (int): Unique ID of the organization
         name (str): Name of the key
-        region (str, optional): Region of the target service as the prefix of a key
 
     Returns:
         Tuple[AccessKey, str]: The created access key object and its value

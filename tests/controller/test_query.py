@@ -7,6 +7,7 @@ from webapp.controller import get_organization_id_by_name, get_users_of_organiza
 from webapp.controller import create_access_key, revoke_access_key
 from webapp.controller import get_valid_keys_of_organization, get_revoked_key_hashes
 from webapp.controller import get_user_profile, get_organizations_of_user
+from webapp.controller import get_user_keys_in_organizations
 from webapp.utils import now
 
 
@@ -192,3 +193,39 @@ def test_get_organizations_of_user_invalid_id(database):
     organizations = get_organizations_of_user(database, 999)
 
     assert organizations == []
+
+
+def test_get_user_keys_in_organizations(database):
+    org_name1 = "Test-Organization1"
+    org_name2 = "Test-Organization2"
+    country_code = "USA"
+    organization1 = create_organization(database, org_name1, country_code)
+    organization2 = create_organization(database, org_name2, country_code)
+
+    username = "testuser"
+    email = "testuser@example.com"
+    user = create_user(database, username, email)
+
+    add_user_to_organization(database, user.id, organization1.id)
+    add_user_to_organization(database, user.id, organization2.id)
+
+    key1, _ = create_access_key(database, user.id, organization1.id, "key1")
+    key2, _ = create_access_key(database, user.id, organization2.id)
+
+    user_keys = get_user_keys_in_organizations(database, user.id,
+                                               [organization1.id, organization2.id])
+
+    assert len(user_keys) == 2
+    assert {"id": key1.id, "thumbnail": key1.thumbnail, "create_time": key1.create_time} \
+        in user_keys
+    assert {"id": key2.id, "thumbnail": key2.thumbnail, "create_time": key2.create_time} \
+        in user_keys
+
+    # Test with custom columns
+    user_keys_custom = get_user_keys_in_organizations(database, user.id,
+                                                      [organization1.id, organization2.id],
+                                                      columns=["name", "id", "thumbnail"])
+
+    assert len(user_keys_custom) == 2
+    assert {"name": "key1", "id": key1.id, "thumbnail": key1.thumbnail} in user_keys_custom
+    assert {"name": None, "id": key2.id, "thumbnail": key2.thumbnail} in user_keys_custom

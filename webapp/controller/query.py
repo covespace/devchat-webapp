@@ -116,3 +116,32 @@ def get_organizations_of_user(db: Session, user_id: int,
         filter(organization_user.c.user_id == user_id).all()
 
     return [row._asdict() for row in user_orgs]
+
+
+def get_user_keys_in_organizations(db: Session, user_id: int, org_ids: List[int],
+                                   columns: List[str] = None) -> List[Dict[str, Any]]:
+    """
+    Get keys of a user in certain organizations.
+
+    Args:
+        db (Session): Database session.
+        user_id (int): ID of the user.
+        org_ids (List[int]): List of organization IDs.
+        columns (List[str], optional): List of columns to return.
+            Default is ['id', 'thumbnail', 'create_time'].
+
+    Returns:
+        List[Dict[str, Any]]: List of dictionaries containing key information.
+            Each dictionary contains key data with keys matching the specified columns.
+    """
+    if not columns:
+        columns = ['id', 'thumbnail', 'create_time']
+
+    selected_columns = [getattr(AccessKey, column).label(column) for column in columns]
+
+    user_keys = db.query(AccessKey).with_entities(*selected_columns). \
+        filter(AccessKey.user_id == user_id,
+               AccessKey.organization_id.in_(org_ids),
+               AccessKey.revoke_time.is_(None)).all()
+
+    return [row._asdict() for row in user_keys]

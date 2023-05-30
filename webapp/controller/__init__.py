@@ -6,6 +6,7 @@ from .query import get_valid_keys_of_organization
 from .query import get_revoked_key_hashes
 from .query import get_user_profile
 from .query import get_organizations_of_user
+from .query import get_user_keys_in_organizations
 from .transact import add_transactions_batch, calculate_balances
 
 __all__ = [
@@ -22,5 +23,6 @@ __all__ = [
     "add_transactions_batch",
     "calculate_balances",
     "get_user_profile",
-    "get_organizations_of_user"
+    "get_organizations_of_user",
+    "get_user_keys_in_organizations",
 ]
