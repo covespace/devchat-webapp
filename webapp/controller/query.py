@@ -31,11 +31,11 @@ def get_users_of_organization(db: Session, org_id: int,
 
     Args:
         org_id (int): Unique ID of the organization
-        columns (list, optional): List of user columns to return.
+        columns (list, optional): List of user columns to return. \
             Default is ['id', 'username', 'email'].
 
     Returns:
-        list: List of dictionaries containing user information.
+        list: List of dictionaries containing user information. \
             Each dictionary contains user data with keys matching the specified columns.
     """
     if not columns:
@@ -94,11 +94,11 @@ def get_organizations_of_user(db: Session, user_id: int,
 
     Args:
         user_id (int): Unique ID of the user
-        columns (list, optional): List of organization and organization_user columns to return.
-                                  Default is ['id', 'name', 'role'].
+        columns (list, optional): List of organization and organization_user columns to return. \
+            Default is ['id', 'name', 'role'].
 
     Returns:
-        list: List of dictionaries containing organization information.
+        list: List of dictionaries containing organization information. \
             Each dictionary contains organization data with keys matching the specified columns.
     """
     if not columns:
@@ -119,7 +119,7 @@ def get_organizations_of_user(db: Session, user_id: int,
 
 
 def get_user_keys_in_organizations(db: Session, user_id: int, org_ids: List[int],
-                                   columns: List[str] = None) -> List[Dict[str, Any]]:
+                                   columns: List[str] = None) -> Dict[int, List[Dict[str, Any]]]:
     """
     Get keys of a user in certain organizations.
 
@@ -127,16 +127,18 @@ def get_user_keys_in_organizations(db: Session, user_id: int, org_ids: List[int]
         db (Session): Database session.
         user_id (int): ID of the user.
         org_ids (List[int]): List of organization IDs.
-        columns (List[str], optional): List of columns to return.
+        columns (List[str], optional): List of columns to return. \
             Default is ['id', 'thumbnail', 'create_time'].
 
     Returns:
-        List[Dict[str, Any]]: List of dictionaries containing key information.
+        Dict[int, List[Dict[str, Any]]]: Dictionary indexed by organization ID \
+            containing a list of dictionaries with key information. \
             Each dictionary contains key data with keys matching the specified columns.
     """
     if not columns:
         columns = ['id', 'thumbnail', 'create_time']
-
+    if 'organization_id' not in columns:
+        columns.append('organization_id')
     selected_columns = [getattr(AccessKey, column).label(column) for column in columns]
 
     user_keys = db.query(AccessKey).with_entities(*selected_columns). \
@@ -144,4 +146,12 @@ def get_user_keys_in_organizations(db: Session, user_id: int, org_ids: List[int]
                AccessKey.organization_id.in_(org_ids),
                AccessKey.revoke_time.is_(None)).all()
 
-    return [row._asdict() for row in user_keys]
+    result = {}
+    for row in user_keys:
+        row_dict = row._asdict()
+        org_id = row_dict.pop('organization_id')
+        if org_id not in result:
+            result[org_id] = []
+        result[org_id].append(row_dict)
+
+    return result

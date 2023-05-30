@@ -217,9 +217,9 @@ def test_get_user_keys_in_organizations(database):
 
     assert len(user_keys) == 2
     assert {"id": key1.id, "thumbnail": key1.thumbnail, "create_time": key1.create_time} \
-        in user_keys
+        in user_keys[organization1.id]
     assert {"id": key2.id, "thumbnail": key2.thumbnail, "create_time": key2.create_time} \
-        in user_keys
+        in user_keys[organization2.id]
 
     # Test with custom columns
     user_keys_custom = get_user_keys_in_organizations(database, user.id,
@@ -227,5 +227,7 @@ def test_get_user_keys_in_organizations(database):
                                                       columns=["name", "id", "thumbnail"])
 
     assert len(user_keys_custom) == 2
-    assert {"name": "key1", "id": key1.id, "thumbnail": key1.thumbnail} in user_keys_custom
-    assert {"name": None, "id": key2.id, "thumbnail": key2.thumbnail} in user_keys_custom
+    assert {"name": "key1", "id": key1.id, "thumbnail": key1.thumbnail} \
+        in user_keys_custom[organization1.id]
+    assert {"name": None, "id": key2.id, "thumbnail": key2.thumbnail} \
+        in user_keys_custom[organization2.id]
