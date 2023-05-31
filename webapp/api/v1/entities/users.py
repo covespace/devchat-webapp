@@ -80,7 +80,8 @@ async def get_user_organizations_endpoint(user_id: int, db: Session = Depends(ge
     org_keys = get_user_keys_in_organizations(db, user_id, org_ids)
 
     for org in organizations:
-        org_id = org["id"]
-        org["keys"] = org_keys[org_id]
+        org["org_id"] = org.pop("id")
+        org["org_name"] = org.pop("name")
+        org["keys"] = org_keys.get(org["org_id"], [])
 
     return [OrganizationResponse(**org) for org in organizations]

@@ -157,7 +157,7 @@ def get_user_keys_in_organizations(db: Session, user_id: int, org_ids: List[int]
     Returns:
         Dict[int, List[Dict[str, Any]]]: Dictionary indexed by organization ID \
             containing a list of dictionaries with key information. \
-            Each dictionary contains key data with keys matching the specified columns.
+            Each dictionary contains key data matching the specified columns.
     """
     if not columns:
         columns = ['id', 'thumbnail', 'create_time']
