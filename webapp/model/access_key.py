@@ -14,7 +14,7 @@ class AccessKey(Base):
         id (int): Unique auto-increment Biginteger identifier for the key
         name (str): Name of the key
         key_hash (str): Hash of the key for storage and comparison
-        prefix (str): Prefix for the key based on the target service region
+        thumbnail (str): Thumbnail of the key as a hint for the user
         create_time (datetime): Time when the key was created
         revoke_time (datetime): Time when the key was revoked
         user_id (int): Foreign key for the user associated with the key
@@ -24,8 +24,8 @@ class AccessKey(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     name = Column(String, nullable=True)
-    key_hash = Column(String, nullable=False)
-    prefix = Column(String, nullable=False)
+    key_hash = Column(String, nullable=False, unique=True)
+    thumbnail = Column(String, nullable=False)
     create_time = Column(DateTime(timezone=True), nullable=False,
                          default=func.now())  # pylint: disable=E1102
     revoke_time = Column(DateTime(timezone=True), nullable=True)
@@ -38,10 +38,10 @@ class AccessKey(Base):
     def __init__(self, key: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.key_hash = hash_access_key(key)
-        self.prefix = key[:10]
+        self.thumbnail = key[:7] + '...' + key[-7:]
 
     def __repr__(self):
         return f"<AccessKey(id={self.id}, name='{self.name}', " \
-               f"key_hash='{self.key_hash}', prefix='{self.prefix}', " \
+               f"key_hash='{self.key_hash}', thumbnail='{self.thumbnail}', " \
                f"create_time='{self.create_time}', revoke_time='{self.revoke_time}', " \
                f"user_id={self.user_id}, organization_id={self.organization_id})>"

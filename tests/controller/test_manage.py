@@ -173,6 +173,8 @@ def test_create_key_success(database):
     email = "testuser@example.com"
     user = create_user(database, username, email)
 
+    add_user_to_organization(database, user.id, organization.id)
+
     key_name = "Test Key"
     key, value = create_access_key(database, user.id, organization.id, key_name)
 
@@ -202,6 +204,8 @@ def test_revoke_key_success(database):
     username = "testuser"
     email = "testuser@example.com"
     user = create_user(database, username, email)
+
+    add_user_to_organization(database, user.id, organization.id)
 
     key_name = "Test Key"
     key, _ = create_access_key(database, user.id, organization.id, key_name)

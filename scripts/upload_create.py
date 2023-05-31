@@ -117,7 +117,7 @@ def process_excel_file(file_path: str):
         org_id = create_organization(org_name)
         if org_id is None:
             logger.warning("Check row %d for failed org creation", row[0].row)
-            break
+            continue
 
         owner_id = create_user(owner_email)
         if owner_id is None:

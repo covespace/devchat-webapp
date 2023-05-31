@@ -68,6 +68,8 @@ def generate_uuid(name: str) -> str:
 
 
 def generate_access_key(org_id: int) -> str:
+    if not org_id:
+        raise ValueError("Invalid organization ID")
     # Load the HS256 secret key from environment variables
     secret_key = _get_jwt_secret_key()
 

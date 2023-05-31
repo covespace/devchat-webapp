@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user, Role
 from webapp.model import AccessKey
 from webapp.utils import now, generate_access_key
+from webapp.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def create_organization(db: Session, name: str, country_code: str) -> Organization:
@@ -80,49 +83,39 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int,
     Returns:
         bool: True if the user was added successfully, False otherwise
     """
-    user = db.query(User).filter(User.id == user_id).first()
-    organization = db.query(Organization).filter(Organization.id == organization_id).first()
-
-    if user and organization:
-        stmt = insert(organization_user).values(
-            organization_id=organization_id,
-            user_id=user_id,
-            role=role
-        )
-        try:
-            db.execute(stmt)
-            db.commit()
-            return True
-        except Exception as exc:
-            db.rollback()
-            raise exc
-    else:
-        raise ValueError("User or organization does not exist.")
+    stmt = insert(organization_user).values(
+        organization_id=organization_id,
+        user_id=user_id,
+        role=role
+    )
+    try:
+        db.execute(stmt)
+        db.commit()
+        return True
+    except IntegrityError as error:
+        db.rollback()
+        raise ValueError("User/organization not found or duplicate addition.") from error
+    except Exception as exc:
+        db.rollback()
+        raise exc
 
 
 def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: Role):
-    user_organization = (
-        db.query(organization_user)
-        .filter(organization_user.c.user_id == user_id)
-        .filter(organization_user.c.organization_id == organization_id)
-        .first()
+    db.execute(
+        organization_user.update()
+        .where(organization_user.c.user_id == user_id)
+        .where(organization_user.c.organization_id == organization_id)
+        .values(role=role)
     )
-
-    if user_organization:
-        db.execute(
-            organization_user.update()
-            .where(organization_user.c.user_id == user_id)
-            .where(organization_user.c.organization_id == organization_id)
-            .values(role=role)
-        )
-        try:
-            db.commit()
-            return True
-        except Exception as exc:
-            db.rollback()
-            raise exc
-    else:
-        raise ValueError("No such user in organization.")
+    try:
+        db.commit()
+        return True
+    except IntegrityError as error:
+        db.rollback()
+        raise ValueError("No such user or organization.") from error
+    except Exception as exc:
+        db.rollback()
+        raise exc
 
 
 def create_access_key(db: Session, user_id: int, organization_id: int,
@@ -134,22 +127,26 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
         user_id (int): Unique ID of the user
         organization_id (int): Unique ID of the organization
         name (str): Name of the key
-        region (str, optional): Region of the target service as the prefix of a key
 
     Returns:
         Tuple[AccessKey, str]: The created access key object and its value
     """
-    value = generate_access_key(organization_id)
-    key = AccessKey(value, user_id=user_id, organization_id=organization_id, name=name)
+    with db.begin_nested():
+        # Check if the user belongs to the organization
+        user_org_role = db.query(organization_user).filter(
+            organization_user.c.user_id == user_id,
+            organization_user.c.organization_id == organization_id).first()
+        if not user_org_role:
+            raise ValueError("User not found in the organization")
 
-    try:
+        value = generate_access_key(organization_id)
+        key = AccessKey(value, user_id=user_id, organization_id=organization_id, name=name)
+
         db.add(key)
         db.commit()
-        db.refresh(key)
-        return (key, value)
-    except Exception as exc:
-        db.rollback()
-        raise exc
+    logger.info("Created access key %d (hash: %s) for user %d in organization %d",
+                key.id, key.key_hash, key.user_id, key.organization_id)
+    return (key, value)
 
 
 def revoke_access_key(db: Session, key_id: int):
