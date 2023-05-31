@@ -47,9 +47,9 @@ class LoginResponse(BaseModel):
 async def login_endpoint(request: LoginRequest, db: Session = Depends(get_db)):
     user_id = login_by_key_hash(db, request.key_hash)
     if user_id is not None:
-        return LoginResponse(message="Login successful.", user_id=user_id)
+        return LoginResponse(message="Login successful", user_id=user_id)
     else:
-        raise HTTPException(status_code=401, detail="Invalid key hash.")
+        raise HTTPException(status_code=401, detail="Invalid key hash")
 
 
 class UserProfileResponse(BaseModel):

@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
 from webapp.main import app
 from webapp.controller import create_access_key, create_user, create_organization
+from webapp.controller import add_user_to_organization
 from webapp.utils import hash_access_key
 
 client = TestClient(app)
@@ -49,6 +50,7 @@ def test_get_user_profile_not_found(database):  # pylint: disable=W0613
 def test_login(database):
     user = create_user(database, username="testuser", email="testuser@example.com")
     org = create_organization(database, name="Test-Org", country_code="US")
+    add_user_to_organization(database, user.id, org.id)
 
     # Create an access key for the user
     _, key_value = create_access_key(database, user_id=user.id, organization_id=org.id)
@@ -57,11 +59,11 @@ def test_login(database):
         "key_hash": hash_access_key(key_value)
     })
     assert response.status_code == 200
-    assert response.json()["message"] == "Login successful."
+    assert response.json()["message"] == "Login successful"
     assert response.json()["user_id"] == user.id
 
     response = client.post("/api/v1/login", json={
         "key_hash": hash_access_key(key_value + ' ')
     })
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid key hash."
+    assert response.json()["detail"] == "Invalid key hash"

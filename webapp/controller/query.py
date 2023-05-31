@@ -3,9 +3,13 @@ query.py contains functions to query the database.
 """
 from datetime import datetime
 from typing import Optional, List, Dict, Any
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user
 from webapp.model import AccessKey
+from webapp.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def get_organization_id_by_name(db: Session, org_name: str) -> int:
@@ -91,10 +95,13 @@ def login_by_key_hash(db: Session, key_hash: str) -> Optional[int]:
     Returns:
         Optional[int]: User ID associated with the hash key, or None if not found.
     """
-    access_key = db.query(AccessKey).filter(AccessKey.key_hash == key_hash).first()
-    if access_key is not None:
-        return access_key.user_id
-    return None
+    stmt = select(AccessKey).where(AccessKey.key_hash == key_hash)
+    result = db.execute(stmt)
+    access_key = result.scalars().first()
+    if access_key is None:
+        logger.warning("Invalid key hash for login: %s", key_hash)
+        return None
+    return access_key.user_id
 
 
 def get_user_profile(db: Session, user_id: int) -> Optional[Dict[str, str]]:

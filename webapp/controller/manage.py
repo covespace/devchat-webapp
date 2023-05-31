@@ -8,6 +8,9 @@ from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user, Role
 from webapp.model import AccessKey
 from webapp.utils import now, generate_access_key
+from webapp.utils import get_logger
+
+logger = get_logger(__name__)
 
 
 def create_organization(db: Session, name: str, country_code: str) -> Organization:
@@ -128,17 +131,22 @@ def create_access_key(db: Session, user_id: int, organization_id: int,
     Returns:
         Tuple[AccessKey, str]: The created access key object and its value
     """
-    value = generate_access_key(organization_id)
-    key = AccessKey(value, user_id=user_id, organization_id=organization_id, name=name)
+    with db.begin_nested():
+        # Check if the user belongs to the organization
+        user_org_role = db.query(organization_user).filter(
+            organization_user.c.user_id == user_id,
+            organization_user.c.organization_id == organization_id).first()
+        if not user_org_role:
+            raise ValueError("User not found in the organization")
 
-    try:
+        value = generate_access_key(organization_id)
+        key = AccessKey(value, user_id=user_id, organization_id=organization_id, name=name)
+
         db.add(key)
         db.commit()
-        db.refresh(key)
-        return (key, value)
-    except Exception as exc:
-        db.rollback()
-        raise exc
+    logger.info("Created access key %d (hash: %s) for user %d in organization %d",
+                key.id, key.key_hash, key.user_id, key.organization_id)
+    return (key, value)
 
 
 def revoke_access_key(db: Session, key_id: int):
