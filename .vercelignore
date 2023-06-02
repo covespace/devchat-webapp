@@ -1,6 +1,7 @@
 # .vercelignore
-node_modules/
-__pycache__/
+node_modules
+__pycache__
+tests
 *.pyc
 *.pyo
 *.pyd
