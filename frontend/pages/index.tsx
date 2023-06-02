@@ -1,8 +1,34 @@
+// frontend/pages/index.tsx
+import apiClient from '../app/apiClient';
 import { useState } from 'react';
 import Head from 'next/head';
+import Image from 'next/image';
+import { useRouter } from 'next/router';
+import { AxiosError } from 'axios';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState('signin');
+  const [accessKey, setAccessKey] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const router = useRouter();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await apiClient.post('/api/v1/login', { key_hash: accessKey });
+      const { user_id } = response.data;
+      localStorage.setItem('user_id', user_id.toString());
+      router.push('/profile');
+    }
+    catch (error: unknown) {
+      console.error('Error signing in:', error);
+      if (error instanceof Error && error.message === 'Network Error') {
+        setErrorMessage('Network error. Please check your connection and try again.');
+      } else {
+        setErrorMessage('Failed to sign in. Please check your access key.');
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto px-4">
@@ -12,7 +38,7 @@ const Home: React.FC = () => {
       </Head>
 
       <main className="flex flex-col items-center justify-center min-h-screen py-2">
-        <img src="/devchat.png" alt="Logo" className="w-32 h-32 mb-4" />
+        <Image src="/devchat.png" alt="Logo" width={120} height={120} style={{ marginBottom: '2rem' }} />
         <h1 className="text-4xl font-bold mb-8">Welcome to DevChat!</h1>
 
         <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col w-[400px]">
@@ -36,7 +62,7 @@ const Home: React.FC = () => {
           </div>
 
           {activeTab === 'signin' && (
-            <form>
+            <form onSubmit={handleSignIn}>
               <div className="mb-4">
                 <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="access-key">
                   Access Key
@@ -46,8 +72,11 @@ const Home: React.FC = () => {
                   id="access-key"
                   type="text"
                   placeholder="Enter your access key"
+                  value={accessKey}
+                  onChange={(e) => setAccessKey(e.target.value)}
                 />
               </div>
+              {errorMessage && <p className="text-red-500 text-xs italic mb-4">{errorMessage}</p>}
               <button
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                 type="submit"
