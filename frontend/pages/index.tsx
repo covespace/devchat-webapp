@@ -12,9 +12,10 @@ const Home: React.FC = () => {
       </Head>
 
       <main className="flex flex-col items-center justify-center min-h-screen py-2">
+        <img src="/devchat.png" alt="Logo" className="w-32 h-32 mb-4" />
         <h1 className="text-4xl font-bold mb-8">Welcome to DevChat!</h1>
 
-        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col">
+        <div className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col w-[400px]">
           <div className="flex mb-4">
             <button
               className={`text-2xl font-semibold mr-4 ${
