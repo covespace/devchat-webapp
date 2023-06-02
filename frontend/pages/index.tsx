@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
-import { AxiosError } from 'axios';
+import { isAxiosError } from 'axios';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState('signin');
@@ -22,10 +22,10 @@ const Home: React.FC = () => {
     }
     catch (error: unknown) {
       console.error('Error signing in:', error);
-      if (error instanceof Error && error.message === 'Network Error') {
-        setErrorMessage('Network error. Please check your connection and try again.');
-      } else {
+      if (isAxiosError(error) && error.response && error.response.status === 401) {
         setErrorMessage('Failed to sign in. Please check your access key.');
+      } else {
+        setErrorMessage('Network error. Please check your connection and try again.');
       }
     }
   };
