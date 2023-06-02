@@ -32,10 +32,24 @@ jobs:
             pylint webapp
             pylint tests
       - run:
+          name: Check for webapp and scripts changes
+          command: |
+            git diff --quiet HEAD^ HEAD webapp || echo "export WEBAPP_CHANGED=true" >> $BASH_ENV
+            git diff --quiet HEAD^ HEAD scripts || echo "export SCRIPTS_CHANGED=true" >> $BASH_ENV
+      - run:
           name: Run pytest
           command: |
             . venv/bin/activate
-            pytest tests
+            if [ "$WEBAPP_CHANGED" = "true" ]; then
+              pytest $(find tests -type d ! -path 'tests/scripts' ! -path 'tests/scripts/*')
+            else
+              echo "No changes in webapp, skipping pytest for webapp"
+            fi
+            if [ "$SCRIPTS_CHANGED" = "true" ]; then
+              pytest tests/scripts
+            else
+              echo "No changes in scripts, skipping pytest for tests/scripts"
+            fi
 
 workflows:
   build_and_test:
