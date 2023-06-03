@@ -1,11 +1,13 @@
 #!/bin/bash
 # Convince bash to start a local dev environment when all dependencies are installed
 
-export HOST="127.0.0.1"
+export DATABASE_URL="postgresql://merico@localhost/devchat"
+
+HOST="127.0.0.1"
 # Set the port for FastAPI
-export FASTAPI_PORT="8000"
+FASTAPI_PORT="8000"
 # Set the port for Next.js
-export NEXT_PORT="3000"
+NEXT_PORT="3000"
 
 # Check if PostgreSQL service is running
 pg_status=$(brew services list | grep postgresql | awk '{print $2}')
@@ -28,7 +30,7 @@ if [ -z "$fastapi_pid" ]; then
   uvicorn webapp.main:app --host $HOST --port $FASTAPI_PORT --reload >> webapp.log 2>&1 &
   echo "FastAPI service started with PID $!"
 else
-  echo "FastAPI service is already running with PID $fastapi_pid."
+  echo "FastAPI service is already running with PID $fastapi_pid"
 fi
 
 # Check if the Next.js frontend is already running
@@ -40,5 +42,5 @@ if [ -z "$next_pid" ]; then
   npm run --prefix frontend dev -- --port $NEXT_PORT >> frontend.log 2>&1 &
   echo "Next.js frontend started with PID $!"
 else
-  echo "Next.js frontend is already running with PID $next_pid."
+  echo "Next.js frontend is already running with PID $next_pid"
 fi
