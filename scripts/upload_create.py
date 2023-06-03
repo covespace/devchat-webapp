@@ -27,7 +27,7 @@ def create_organization(org_name: str) -> int:
         timeout=20
     )
     if response.status_code != 201:
-        logger.error("Failed to create organization %s", org_name)
+        logger.error("Failed to create organization %s: %s", org_name, response.json())
         return None
     logger.info("Successfully created organization %s", org_name)
     return response.json()["org_id"]
@@ -41,7 +41,7 @@ def create_user(email: str) -> int:
         timeout=20
     )
     if response.status_code != 201:
-        logger.error("Failed to create user %s", email)
+        logger.error("Failed to create user %s: %s", email, response.json())
         return None
     logger.info("Successfully created user %s", email)
     return response.json()["user_id"]
@@ -54,8 +54,8 @@ def add_user_to_organization(org_id: int, user_id: int, role: str) -> bool:
         timeout=20
     )
     if response.status_code != 200:
-        logger.error("Failed to add user %d to organization %d with role '%s'",
-                     user_id, org_id, role)
+        logger.error("Failed to add user %d to organization %d with role '%s': %s",
+                     user_id, org_id, role, response.json())
         return False
     logger.info("Successfully added user %d to organization %d with role '%s'",
                 user_id, org_id, role)
@@ -68,8 +68,8 @@ def issue_access_key(org_id: int, user_id: int) -> bool:
         timeout=20
     )
     if response.status_code != 200:
-        logger.error("Failed to issue access key for user %d in organization %d",
-                     user_id, org_id)
+        logger.error("Failed to issue access key for user %d in organization %d: %s",
+                     user_id, org_id, response.json())
         return False
     logger.info("Successfully issued access key for user %d in organization %d", user_id, org_id)
     return True
@@ -90,7 +90,7 @@ def check_existence(org_name: str, email: str) -> bool:
         timeout=20
     )
     if response.status_code != 200:
-        logger.error("Failed to fetch users for organization %d", org_id)
+        logger.error("Failed to fetch users for organization %d: %s", org_id, response.json())
         return False
 
     users: List[dict] = response.json()
