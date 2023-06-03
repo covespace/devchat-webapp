@@ -29,7 +29,7 @@ def create_organization(db: Session, name: str, country_code: str) -> Organizati
     try:
         db.add(organization)
         db.commit()
-        db.refresh(organization)
+        logger.info("Created organization %d (name: %s)", organization.id, organization.name)
         return organization
     except IntegrityError as error:
         db.rollback()
@@ -60,7 +60,7 @@ def create_user(db: Session, username: str, email: str,
     try:
         db.add(user)
         db.commit()
-        db.refresh(user)
+        logger.info("Created user %d (username: %s)", user.id, user.username)
         return user
     except IntegrityError as error:
         db.rollback()
@@ -91,6 +91,7 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int,
     try:
         db.execute(stmt)
         db.commit()
+        logger.info("Added user %d to organization %d", user_id, organization_id)
         return True
     except IntegrityError as error:
         db.rollback()
@@ -100,15 +101,16 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int,
         raise exc
 
 
-def assign_role_to_user(db: Session, user_id: int, organization_id: int, role: Role):
+def assign_role_to_user(db: Session, user_id: int, org_id: int, role: Role):
     db.execute(
         organization_user.update()
         .where(organization_user.c.user_id == user_id)
-        .where(organization_user.c.organization_id == organization_id)
+        .where(organization_user.c.organization_id == org_id)
         .values(role=role)
     )
     try:
         db.commit()
+        logger.info("Assigned role %s to user %d in organization %d", role, user_id, org_id)
         return True
     except IntegrityError as error:
         db.rollback()
@@ -165,6 +167,8 @@ def revoke_access_key(db: Session, key_id: int):
         key.revoke_time = now(db)
         try:
             db.commit()
+            logger.info("Revoked access key %d (hash: %s) for user %d in organization %d",
+                        key.id, key.key_hash, key.user_id, key.organization_id)
             return True
         except Exception as exc:
             db.rollback()

@@ -6,7 +6,10 @@ from typing import List
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 from webapp.model import Organization, Transaction, Balance, Payment
-from webapp.utils import now
+from webapp.utils import now, get_logger
+
+
+logger = get_logger(__name__)
 
 
 def add_transactions_batch(db: Session, transactions: List[Transaction]):
@@ -19,6 +22,7 @@ def add_transactions_batch(db: Session, transactions: List[Transaction]):
     try:
         db.add_all(transactions)
         db.commit()
+        logger.info("Added %d transactions to the database", len(transactions))
         return True
     except Exception as exc:
         db.rollback()
@@ -82,4 +86,5 @@ def calculate_balances(db: Session, organization_ids=None):
         balances.append((org_id, new_balance))
 
     db.commit()
+    logger.info("Calculated balances for %d organizations", len(balances))
     return balances
