@@ -2,6 +2,7 @@
 # Convince bash to start a local dev environment when all dependencies are installed
 
 export DATABASE_URL="postgresql://merico@localhost/devchat"
+export JWT_SECRET_KEY="2b78c11a90101b11751202921fd62db70d59ad4753e8c0a848d87e430e4bfadc"
 
 HOST="127.0.0.1"
 # Set the port for FastAPI
