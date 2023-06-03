@@ -41,7 +41,7 @@ jobs:
           command: |
             . venv/bin/activate
             if [ "$WEBAPP_CHANGED" = "true" ]; then
-              pytest $(find tests -type d ! -path 'tests/scripts' ! -path 'tests/scripts/*')
+              pytest $(find tests -mindepth 1 -type d ! -path 'tests/scripts' ! -path 'tests/scripts/*')
             else
               echo "No changes in webapp, skipping pytest for webapp"
             fi
