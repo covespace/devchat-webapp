@@ -9,6 +9,7 @@ import os
 import random
 import re
 import time
+from typing import Dict
 import uuid
 
 import boto3
@@ -131,40 +132,35 @@ def send_email(from_email: str, from_name: str, to_email: str,
 def _get_jwt_secret_key() -> str:
     if 'JWT_SECRET_KEY' in os.environ:
         return os.environ['JWT_SECRET_KEY']
-    return _get_secret_from_aws_secrets_manager('JWT', 'SECRET_KEY')
+    return get_secrets_from_aws('JWT')['SECRET_KEY']
 
 
 def _get_sendgrid_api_key() -> str:
     if 'SENDGRID_API_KEY' in os.environ:
         return os.environ['SENDGRID_API_KEY']
-    return _get_secret_from_aws_secrets_manager('SENDGRID', 'API_KEY')
+    return get_secrets_from_aws('SENDGRID')['API_KEY']
 
 
-def _get_secret_from_aws_secrets_manager(secret_name: str, key_name: str) -> str:
+def get_secrets_from_aws(secret_id: str) -> Dict[str, str]:
     """
-    Get a secret from AWS Secrets Manager.
+    Get a secret dictionary from AWS Secrets Manager.
     """
-
-    region_name = "ap-southeast-1"
-    # Create a Secrets Manager client
-    session = boto3.session.Session()
-    client = session.client(
-        service_name='secretsmanager',
-        region_name=region_name
-    )
-
     try:
+        region_name = "ap-southeast-1"
+        # Create a Secrets Manager client
+        session = boto3.session.Session()
+        client = session.client(
+            service_name='secretsmanager',
+            region_name=region_name
+        )
+
         get_secret_value_response = client.get_secret_value(
-            SecretId=secret_name
+            SecretId=secret_id
         )
     except Exception as exc:
         # Raise an exception if unable to get the secret
-        raise ValueError("Unable to get the secret from AWS Secrets Manager") from exc
+        raise ValueError(f"Unable to get {secret_id} from AWS Secrets Manager") from exc
 
     # Decrypts secret using the associated KMS key.
     # Assuming the secret is a string, we parse it as a JSON object
-    secret_dict = json.loads(get_secret_value_response['SecretString'])
-
-    if key_name not in secret_dict:
-        raise ValueError("Unable to get the secret from AWS Secrets Manager")
-    return secret_dict[key_name]
+    return json.loads(get_secret_value_response['SecretString'])
