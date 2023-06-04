@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from webapp.model import Organization, User, organization_user
 from webapp.model import AccessKey
-from webapp.utils import get_logger
+from webapp.utils import get_logger, hash_access_key
 
 logger = get_logger(__name__)
 
@@ -84,7 +84,7 @@ def get_revoked_key_hashes(db: Session, start_time: datetime, end_time: datetime
     return [key_hash[0] for key_hash in revoked_keys]
 
 
-def login_by_key_hash(db: Session, key_hash: str) -> Optional[int]:
+def login_by_key(db: Session, key: str) -> Optional[int]:
     """
     Get the user ID associated with the given hash key.
 
@@ -95,6 +95,7 @@ def login_by_key_hash(db: Session, key_hash: str) -> Optional[int]:
     Returns:
         Optional[int]: User ID associated with the hash key, or None if not found.
     """
+    key_hash = hash_access_key(key)
     stmt = select(AccessKey).where(AccessKey.key_hash == key_hash)
     result = db.execute(stmt)
     access_key = result.scalars().first()

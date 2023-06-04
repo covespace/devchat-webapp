@@ -110,10 +110,10 @@ def now(db: Session) -> datetime:
     return db.query(func.now()).scalar()  # pylint: disable=E1102
 
 
-def send_email(from_email: str, from_name: str, to_email: str,
+def send_email(from_address: str, from_name: str, to_address: str,
                template_id: str, template_data: dict) -> int:
-    from_email = Email(from_email, from_name)
-    to_email = To(to_email)
+    from_email = Email(from_address, from_name)
+    to_email = To(to_address)
     mail = Mail(from_email, to_email)
 
     # Set the transactional template ID
@@ -125,7 +125,7 @@ def send_email(from_email: str, from_name: str, to_email: str,
     client = SendGridAPIClient(_get_sendgrid_api_key())
     response = client.send(mail)
     logger.info("Sent email of template %s to %s with status code %s",
-                template_id, to_email, response.status_code)
+                template_id, to_address, response.status_code)
     return response.status_code
 
 
