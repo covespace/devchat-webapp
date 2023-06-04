@@ -1,10 +1,10 @@
-// frontend/pages/index.tsx
 import apiClient from '../app/apiClient';
 import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { isAxiosError } from 'axios';
+import SignInForm from '../components/SignInForm';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState('signin');
@@ -19,8 +19,7 @@ const Home: React.FC = () => {
       const { user_id } = response.data;
       localStorage.setItem('user_id', user_id.toString());
       router.push('/profile');
-    }
-    catch (error: unknown) {
+    } catch (error: unknown) {
       console.error('Error signing in:', error);
       if (isAxiosError(error) && error.response && error.response.status === 401) {
         setErrorMessage('Failed to sign in. Please check your access key.');
@@ -62,28 +61,12 @@ const Home: React.FC = () => {
           </div>
 
           {activeTab === 'signin' && (
-            <form onSubmit={handleSignIn}>
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="access-key">
-                  Access Key
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="access-key"
-                  type="text"
-                  placeholder="Enter your access key"
-                  value={accessKey}
-                  onChange={(e) => setAccessKey(e.target.value)}
-                />
-              </div>
-              {errorMessage && <p className="text-red-500 text-xs italic mb-4">{errorMessage}</p>}
-              <button
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                type="submit"
-              >
-                Sign In
-              </button>
-            </form>
+            <SignInForm
+              accessKey={accessKey}
+              errorMessage={errorMessage}
+              onAccessKeyChange={setAccessKey}
+              onSubmit={handleSignIn}
+            />
           )}
 
           {activeTab === 'signup' && (
