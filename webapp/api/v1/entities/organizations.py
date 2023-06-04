@@ -149,8 +149,8 @@ async def issue_access_key_endpoint(
     try:
         key, value = create_access_key(db, user_id, org_id)
         # Send the access key to the user by email
-        status = send_email(from_email="hello@devchat.ai", from_name="DevChat Team",
-                            to_email=key.user.email,
+        status = send_email(from_address="hello@devchat.ai", from_name="DevChat Team",
+                            to_address=key.user.email,
                             template_id="d-052755df2d614200b2343aabe018bc22",
                             template_data={"user_name": key.user.email, "access_key": value})
     except Exception as exc:

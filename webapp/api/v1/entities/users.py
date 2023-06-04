@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from webapp.controller import create_user
-from webapp.controller.query import login_by_key_hash, get_user_profile
+from webapp.controller.query import login_by_key, get_user_profile
 from webapp.controller.query import get_organizations_of_user, get_user_keys_in_organizations
 from webapp.dependencies import get_db
 
@@ -35,7 +35,7 @@ async def create_user_endpoint(user: CreateUserRequest, db: Session = Depends(ge
 
 
 class LoginRequest(BaseModel):
-    key_hash: str
+    key: str
 
 
 class LoginResponse(BaseModel):
@@ -45,7 +45,7 @@ class LoginResponse(BaseModel):
 
 @router.post("/login", response_model=LoginResponse)
 async def login_endpoint(request: LoginRequest, db: Session = Depends(get_db)):
-    user_id = login_by_key_hash(db, request.key_hash)
+    user_id = login_by_key(db, request.key)
     if user_id is not None:
         return LoginResponse(message="Login successful", user_id=user_id)
     else:
