@@ -109,8 +109,7 @@ def process_excel_file(file_path: str):
         org_name = sanitize_name(row[6].value)
         owner_email = row[7].value
         if check_existence(org_name, owner_email):
-            logger.info("Skipped row %d and older rows", row[0].row)
-            break
+            continue
 
         logger.info("Processing row %d", row[0].row)
 
