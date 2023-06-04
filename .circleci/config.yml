@@ -30,6 +30,7 @@ jobs:
           command: |
             . venv/bin/activate
             pylint webapp
+            pylint scripts
             pylint tests
       - run:
           name: Check for webapp and scripts changes
