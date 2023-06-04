@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 from webapp.controller import create_organization
 from webapp.main import app
 
-
 client = TestClient(app)
 
 

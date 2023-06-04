@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from webapp.model.database import Database
 from webapp.utils import get_logger, get_secrets_from_aws
 
-
 logger = get_logger(__name__)
 
 

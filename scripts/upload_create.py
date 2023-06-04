@@ -6,7 +6,6 @@ from typing import List
 import openpyxl
 import requests
 
-
 API_BASE_URL = os.environ.get('API_BASE_URL', 'http://localhost:8000')
 
 logging.basicConfig(
