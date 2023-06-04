@@ -15,7 +15,7 @@ const Home: React.FC = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await apiClient.post('/api/v1/login', { key_hash: accessKey });
+      const response = await apiClient.post('/api/v1/login', { key: accessKey });
       const { user_id } = response.data;
       localStorage.setItem('user_id', user_id.toString());
       router.push('/profile');

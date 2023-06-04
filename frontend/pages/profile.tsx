@@ -2,20 +2,28 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import apiClient from '../app/apiClient';
 
 const Profile: React.FC = () => {
   const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedUserId = localStorage.getItem('user_id');
       if (storedUserId) {
         setUserId(storedUserId);
+        apiClient.get(`/api/v1/users/${storedUserId}/profile`)
+          .then((response) => {
+            setUserName(response.data.username);
+            setUserEmail(response.data.email);
+          });
       } else {
         setTimeout(() => {
           router.push('/');
-        }, 2000);
+        }, 1500);
       }
     }
   }, [router]);
@@ -38,16 +46,20 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <Head>
         <title>Profile</title>
       </Head>
 
-      <main>
-        <h1>Welcome, User ID: {userId}</h1>
-        <button onClick={handleSignOut} className="absolute top-4 right-4">
-          Sign Out
-        </button>
+      <main className="relative w-full h-full sm:max-w-xl sm:mx-auto">
+        <div className="relative px-8 py-16 bg-white shadow-lg sm:rounded-3xl sm:p-20 h-full">
+          <div className="flex justify-between items-start">
+            <h1 className="text-2xl font-semibold mb-4">Welcome, {userName} ({userEmail})!</h1>
+            <button onClick={handleSignOut} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Sign Out
+            </button>
+          </div>
+        </div>
       </main>
     </div>
   );
