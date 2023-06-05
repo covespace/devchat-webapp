@@ -8,7 +8,6 @@ from sqlalchemy.orm import Session
 from webapp.model import Organization, Transaction, Balance, Payment
 from webapp.utils import now, get_logger
 
-
 logger = get_logger(__name__)
 
 

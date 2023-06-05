@@ -5,7 +5,7 @@ import random
 from sqlalchemy import Column, String, BigInteger, DateTime
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql.expression import func
-from webapp.utils import is_valid_email, is_valid_user_name
+from webapp.utils import is_valid_email, is_valid_account_name
 from .database import Base
 from .organization import organization_user
 
@@ -42,7 +42,7 @@ class User(Base):
         super().__init__(*args, **kwargs)
         if not is_valid_email(self.email):
             raise ValueError("Invalid email provided.")
-        if not is_valid_user_name(self.username):
+        if not is_valid_account_name(self.username):
             raise ValueError("Invalid username provided.")
 
         with db.begin_nested():

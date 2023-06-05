@@ -7,7 +7,7 @@ from sqlalchemy import Column, ForeignKey, Table, Enum as SqlEnum
 from sqlalchemy import String, Float, BigInteger, DateTime
 from sqlalchemy.orm import Session, relationship
 from sqlalchemy.sql.expression import func
-from webapp.utils import is_valid_user_name
+from webapp.utils import is_valid_account_name
 from .database import Base
 from .balance import Balance  # pylint: disable=unused-import
 from .payment import Payment  # pylint: disable=unused-import
@@ -56,7 +56,7 @@ class Organization(Base):
 
     def __init__(self, db: Session, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not is_valid_user_name(self.name):
+        if not is_valid_account_name(self.name):
             raise ValueError("Invalid organization name provided.")
 
         with db.begin_nested():
