@@ -18,6 +18,9 @@
     "[javascriptreact]": {
         "editor.tabSize": 2
     },
+    "[css]": {
+        "editor.tabSize": 2
+    },
     "files.insertFinalNewline": true,
-    "editor.formatOnSave": true
+    "editor.formatOnSave": false
 }

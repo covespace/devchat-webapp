@@ -1,0 +1,32 @@
+.form-label {
+  @apply block text-sm font-bold mb-2;
+}
+
+.form-input {
+  @apply block w-full py-2 px-3 text-base leading-6 bg-white border border-gray-300 rounded-md;
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-150 ease-in-out;
+}
+
+.form-button {
+  @apply bg-blue-500 text-white font-semibold py-2 px-4 rounded-md;
+  @apply hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 active:bg-blue-700 transition duration-150 ease-in-out;
+}
+
+/* Dark mode styles */
+@media (prefers-color-scheme: dark) {
+  .form-bg-dark {
+    @apply bg-gray-800;
+  }
+
+  .form-label {
+    @apply text-gray-300;
+  }
+
+  .form-input {
+    @apply text-gray-300 bg-gray-700 border-gray-600;
+  }
+
+  .form-button {
+    @apply bg-blue-600 hover:bg-blue-700 active:bg-blue-800;
+  }
+}
