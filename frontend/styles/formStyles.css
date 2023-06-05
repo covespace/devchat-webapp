@@ -15,7 +15,7 @@
 /* Dark mode styles */
 @media (prefers-color-scheme: dark) {
   .form-bg-dark {
-    @apply bg-gray-800;
+    @apply bg-gray-600;
   }
 
   .form-label {
@@ -23,7 +23,7 @@
   }
 
   .form-input {
-    @apply text-gray-300 bg-gray-700 border-gray-600;
+    @apply text-gray-300 bg-gray-600 border-gray-500;
   }
 
   .form-button {
