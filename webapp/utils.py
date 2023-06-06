@@ -53,8 +53,8 @@ def is_valid_email(email):
     return re.match(email_regex, email) is not None
 
 
-def is_valid_user_name(user_name):
-    name_regex = r'^[a-zA-Z0-9](?:[a-zA-Z0-9]|-(?=[a-zA-Z0-9])){0,37}[a-zA-Z0-9]$'
+def is_valid_account_name(user_name):
+    name_regex = r'^[a-zA-Z0-9](?:[a-zA-Z0-9]|[-_](?=[a-zA-Z0-9])){0,37}[a-zA-Z0-9]$'
     return re.match(name_regex, user_name) is not None
 
 

@@ -19,6 +19,9 @@ RUN apt-get update && apt-get install -y libpq-dev gcc
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r webapp/requirements.txt
 
+# Install Uvicorn
+RUN pip install --no-cache-dir uvicorn
+
 # Remove unnecessary packages
 RUN apt-get autoremove -y gcc
 

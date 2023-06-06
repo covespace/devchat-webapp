@@ -2,7 +2,6 @@ from fastapi.testclient import TestClient
 from webapp.main import app
 from webapp.controller import create_access_key, create_user, create_organization
 from webapp.controller import add_user_to_organization
-from webapp.utils import hash_access_key
 
 client = TestClient(app)
 

@@ -2,7 +2,7 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import apiClient from '../app/apiClient';
+import apiClient from '@/api/client';
 
 const Profile: React.FC = () => {
   const router = useRouter();
