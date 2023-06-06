@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { isAxiosError } from 'axios';
-import apiClient from '../api/apiClient';
+import apiClient from '@/api/client';
 
 const useSignIn = () => {
   const [accessKey, setAccessKey] = useState('');
