@@ -5,7 +5,6 @@ import SignInForm from '../components/SignInForm';
 import SignUpForm from '../components/SignUpForm';
 import useSignIn from '../hooks/useSignIn';
 import useSignUp from '@/hooks/useSignUp';
-import '@/styles/pageStyles.css';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState('signin');

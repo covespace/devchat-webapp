@@ -1,5 +1,4 @@
 import React from 'react';
-import '@/styles/formStyles.css';
 
 interface SignInFormProps {
   accessKey: string;

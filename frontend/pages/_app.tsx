@@ -1,5 +1,8 @@
 // frontend/pages/_app.tsx
-import '../styles/globals.css'
+import '@/styles/globals.css'
+import '@/styles/formStyles.css';
+import '@/styles/pageStyles.css';
+
 import Layout from '../components/Layout'
 import type { AppProps } from 'next/app'
 
