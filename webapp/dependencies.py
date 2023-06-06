@@ -1,8 +1,7 @@
 import os
 from sqlalchemy.orm import Session
 from webapp.model.database import Database
-from webapp.utils import get_logger, get_secrets_from_aws
-
+from webapp.utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -16,18 +15,8 @@ def get_database_url() -> str:
 
     # Try to get the database URL from environment variable
     db_url = os.getenv("DATABASE_URL")
-    if db_url is not None:
-        logger.info("Got database URL from environment variable")
-        return db_url
-
-    # If the environment variable is not set, get the database URL from AWS Secrets Manager
-    db_name = "devchat"
-    secrets = get_secrets_from_aws("pg-1")
-
-    db_url = f"postgresql://{secrets['username']}:{secrets['password']}@" \
-             f"{secrets['host']}:{secrets['port']}/{db_name}"
-
-    logger.info("Got database URL from AWS Secrets Manager")
+    if db_url is None:
+        raise ValueError("DATABASE_URL environment variable is not set.")
     return db_url
 
 

@@ -9,10 +9,8 @@ import os
 import random
 import re
 import time
-from typing import Dict
 import uuid
 
-import boto3
 import jwt
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
@@ -130,37 +128,14 @@ def send_email(from_address: str, from_name: str, to_address: str,
 
 
 def _get_jwt_secret_key() -> str:
-    if 'JWT_SECRET_KEY' in os.environ:
-        return os.environ['JWT_SECRET_KEY']
-    return get_secrets_from_aws('JWT')['SECRET_KEY']
+    secret_key = os.getenv('JWT_SECRET_KEY')
+    if secret_key is None:
+        raise ValueError("JWT_SECRET_KEY environment variable is not set")
+    return secret_key
 
 
 def _get_sendgrid_api_key() -> str:
-    if 'SENDGRID_API_KEY' in os.environ:
-        return os.environ['SENDGRID_API_KEY']
-    return get_secrets_from_aws('SENDGRID')['API_KEY']
-
-
-def get_secrets_from_aws(secret_id: str) -> Dict[str, str]:
-    """
-    Get a secret dictionary from AWS Secrets Manager.
-    """
-    try:
-        region_name = "ap-southeast-1"
-        # Create a Secrets Manager client
-        session = boto3.session.Session()
-        client = session.client(
-            service_name='secretsmanager',
-            region_name=region_name
-        )
-
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_id
-        )
-    except Exception as exc:
-        # Raise an exception if unable to get the secret
-        raise ValueError(f"Unable to get {secret_id} from AWS Secrets Manager") from exc
-
-    # Decrypts secret using the associated KMS key.
-    # Assuming the secret is a string, we parse it as a JSON object
-    return json.loads(get_secret_value_response['SecretString'])
+    sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+    if sendgrid_api_key is None:
+        raise ValueError("SENDGRID_API_KEY environment variable is not set")
+    return sendgrid_api_key
