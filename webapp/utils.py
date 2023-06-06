@@ -1,7 +1,6 @@
 """
 utils.py contains utility functions that are used throughout the webapp.
 """
-import json
 from datetime import datetime
 import hashlib
 import logging
