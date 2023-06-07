@@ -8,10 +8,11 @@ interface CreateUserResponse {
   user_id: number;
 }
 
-export async function createOrganization(org_name: string): Promise<number | null> {
+export async function createOrganization(orgName: string, captchaToken: string | null): Promise<number | null> {
   try {
     const response = await apiClient.post<CreateOrganizationResponse>('/api/v1/organizations', {
-      name: org_name,
+      name: orgName,
+      token: captchaToken,
     });
 
     return response.data.org_id;
@@ -21,11 +22,12 @@ export async function createOrganization(org_name: string): Promise<number | nul
   }
 }
 
-export async function createUser(username: string, email: string): Promise<number | null> {
+export async function createUser(username: string, email: string, captchaToken: string | null): Promise<number | null> {
   try {
     const response = await apiClient.post<CreateUserResponse>('/api/v1/users', {
       username: username,
       email: email,
+      token: captchaToken,
     });
 
     return response.data.user_id;

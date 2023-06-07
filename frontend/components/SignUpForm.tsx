@@ -1,15 +1,18 @@
 import React from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 interface SignUpFormProps {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   signUpErrorMessage: string;
   signUpSuccessMessage: string;
+  onCaptchaVerify: (token: string) => void;
 }
 
 const SignUpForm: React.FC<SignUpFormProps> = ({
   onSubmit,
   signUpErrorMessage,
   signUpSuccessMessage,
+  onCaptchaVerify,
 }) => {
   return (
     <form onSubmit={onSubmit} className="form-bg-dark">
@@ -46,6 +49,10 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
           placeholder="Enter your organization name"
         />
       </div>
+      <HCaptcha
+        sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || ''}
+        onVerify={onCaptchaVerify}
+      />
       {signUpErrorMessage && (
         <p className="text-red-500 text-xs italic mt-2">{signUpErrorMessage}</p>
       )}

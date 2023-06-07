@@ -1,10 +1,12 @@
 import React from 'react';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 interface SignInFormProps {
   accessKey: string;
   errorMessage: string;
   onAccessKeyChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
+  onCaptchaVerify: (token: string) => void;
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({
@@ -12,6 +14,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   errorMessage,
   onAccessKeyChange,
   onSubmit,
+  onCaptchaVerify,
 }) => {
   return (
     <form onSubmit={onSubmit} className="form-bg-dark">
@@ -28,6 +31,10 @@ const SignInForm: React.FC<SignInFormProps> = ({
           onChange={(e) => onAccessKeyChange(e.target.value)}
         />
       </div>
+      <HCaptcha
+        sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || ''}
+        onVerify={onCaptchaVerify}
+      />
       {errorMessage && (
         <p className="text-red-500 text-xs italic mb-4">{errorMessage}</p>
       )}

@@ -4,6 +4,7 @@ import { createOrganization, createUser, addUserToOrganization, issueAccessKey }
 const useSignUp = () => {
   const [signUpErrorMessage, setSignUpErrorMessage] = useState('');
   const [signUpSuccessMessage, setSignUpSuccessMessage] = useState('');
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -12,13 +13,13 @@ const useSignUp = () => {
     const orgName = event.currentTarget['org-name'].value || username;
     const role = 'owner';
 
-    const org_id = await createOrganization(orgName);
+    const org_id = await createOrganization(orgName, captchaToken);
     if (org_id === null) {
       setSignUpErrorMessage('Failed to create account. Please check the user or organization name.');
       return;
     }
 
-    const user_id = await createUser(username, email);
+    const user_id = await createUser(username, email, captchaToken);
     if (user_id === null) {
       setSignUpErrorMessage('Failed to create user. Please check the email address.');
       return;
@@ -40,10 +41,15 @@ const useSignUp = () => {
     setSignUpSuccessMessage('Sign up successful! Check your email for the access key and sign in.');
   };
 
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
   return {
     signUpErrorMessage,
     signUpSuccessMessage,
     handleSignUp,
+    handleCaptchaVerify,
   };
 };
 
