@@ -19,7 +19,6 @@ jobs:
             . venv/bin/activate
             pip install -r webapp/requirements.txt
             pip install -r tests/requirements.txt
-            pip install -r scripts/requirements.txt
             pip install pylint pytest
       - save_cache:
           paths:
@@ -30,26 +29,19 @@ jobs:
           command: |
             . venv/bin/activate
             pylint webapp
-            pylint scripts
             pylint tests
       - run:
-          name: Check for webapp and scripts changes
+          name: Check for webapp changes
           command: |
             git diff --quiet HEAD^ HEAD webapp || echo "export WEBAPP_CHANGED=true" >> $BASH_ENV
-            git diff --quiet HEAD^ HEAD scripts || echo "export SCRIPTS_CHANGED=true" >> $BASH_ENV
       - run:
           name: Run pytest
           command: |
             . venv/bin/activate
             if [ "$WEBAPP_CHANGED" = "true" ]; then
-              pytest $(find tests -mindepth 1 -type d ! -path 'tests/scripts' ! -path 'tests/scripts/*')
+              pytest tests
             else
               echo "No changes in webapp, skipping pytest for webapp"
-            fi
-            if [ "$SCRIPTS_CHANGED" = "true" ]; then
-              pytest tests/scripts
-            else
-              echo "No changes in scripts, skipping pytest for tests/scripts"
             fi
 
 workflows:
