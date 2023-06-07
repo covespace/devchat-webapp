@@ -5,7 +5,7 @@ import apiClient from '@/api/client';
 
 const useSignIn = () => {
   const [accessKey, setAccessKey] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [signInErrorMessage, setErrorMessage] = useState('');
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const router = useRouter();
 
@@ -29,11 +29,11 @@ const useSignIn = () => {
     }
   };
 
-  const handleCaptchaVerify = (token: string) => {
+  const handleSignInCaptcha = (token: string) => {
     setCaptchaToken(token);
   };
 
-  return { accessKey, setAccessKey, errorMessage, handleSignIn, handleCaptchaVerify };
+  return { accessKey, setAccessKey, signInErrorMessage, handleSignIn, handleSignInCaptcha };
 };
 
 export default useSignIn;

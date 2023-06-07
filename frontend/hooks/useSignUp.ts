@@ -41,7 +41,7 @@ const useSignUp = () => {
     setSignUpSuccessMessage('Sign up successful! Check your email for the access key and sign in.');
   };
 
-  const handleCaptchaVerify = (token: string) => {
+  const handleSignUpCaptcha = (token: string) => {
     setCaptchaToken(token);
   };
 
@@ -49,7 +49,7 @@ const useSignUp = () => {
     signUpErrorMessage,
     signUpSuccessMessage,
     handleSignUp,
-    handleCaptchaVerify,
+    handleSignUpCaptcha,
   };
 };
 
