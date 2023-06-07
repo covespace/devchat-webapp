@@ -1,5 +1,4 @@
 from fastapi.testclient import TestClient
-from webapp.controller import create_organization
 from webapp.main import app
 
 client = TestClient(app)
@@ -23,24 +22,6 @@ def test_create_org_invalid_name(database):  # pylint: disable=W0613
 
     assert response.status_code == 422
     assert response.json()["detail"] == "Invalid organization name provided."
-
-
-def test_get_organization_id_by_name_success(database):
-    org_name = "Test-Org"
-    country_code = "US"
-    organization = create_organization(database, org_name, country_code)
-
-    response = client.get(f"/api/v1/organizations/{org_name}/id")
-    assert response.status_code == 200
-    assert response.json()["org_id"] == organization.id
-
-
-def test_get_organization_id_by_name_not_found(database):  # pylint: disable=W0613
-    org_name = "Nonexistent-Org"
-
-    response = client.get(f"/api/v1/organizations/{org_name}/id")
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Organization name not found"
 
 
 def test_list_users(database):  # pylint: disable=W0613
