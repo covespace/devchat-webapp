@@ -6,15 +6,13 @@ import apiClient from '@/api/client';
 const useSignIn = () => {
   const [accessKey, setAccessKey] = useState('');
   const [signInErrorMessage, setErrorMessage] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const response = await apiClient.post('/api/v1/login', {
-        key: accessKey,
-        token: captchaToken,
+        key: accessKey
       });
       const { user_id } = response.data;
       localStorage.setItem('user_id', user_id.toString());
@@ -29,11 +27,7 @@ const useSignIn = () => {
     }
   };
 
-  const handleSignInCaptcha = (token: string) => {
-    setCaptchaToken(token);
-  };
-
-  return { accessKey, setAccessKey, signInErrorMessage, handleSignIn, handleSignInCaptcha };
+  return { accessKey, setAccessKey, signInErrorMessage, handleSignIn };
 };
 
 export default useSignIn;

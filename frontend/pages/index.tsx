@@ -8,7 +8,7 @@ import useSignUp from '@/hooks/useSignUp';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState('signin');
-  const { accessKey, setAccessKey, signInErrorMessage, handleSignIn, handleSignInCaptcha } = useSignIn();
+  const { accessKey, setAccessKey, signInErrorMessage, handleSignIn } = useSignIn();
   const { signUpErrorMessage, signUpSuccessMessage, handleSignUp, handleSignUpCaptcha } = useSignUp();
 
   return (
@@ -46,7 +46,6 @@ const Home: React.FC = () => {
               errorMessage={signInErrorMessage}
               onAccessKeyChange={setAccessKey}
               onSubmit={handleSignIn}
-              onCaptchaVerify={handleSignInCaptcha}
             />
           )}
 
