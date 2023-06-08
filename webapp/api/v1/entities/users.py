@@ -28,7 +28,8 @@ class CreateUserResponse(BaseModel):
 @router.post("/users", response_model=CreateUserResponse, status_code=201)
 async def create_user_endpoint(user_req: CreateUserRequest, db: Session = Depends(get_db)):
     if not verify_hcaptcha(user_req.token):
-        raise HTTPException(status_code=401, detail="Invalid hCaptcha token.")
+        raise HTTPException(status_code=401,
+                            detail="Invalid hCaptcha token. Please refresh the page and try again.")
     template_id = os.getenv("SENDGRID_TEMPLATE_ID")
     if not template_id:
         logger.error("SENDGRID_TEMPLATE_ID environment variable is not set")

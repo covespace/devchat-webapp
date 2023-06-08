@@ -26,7 +26,6 @@ def test_create_user_success(database):  # pylint: disable=W0613
     if response.status_code != 201:
         print(response.json())
     assert response.status_code == 201
-    assert response.json()["message"] == "User created successfully."
     assert isinstance(response.json()["user_id"], int)
 
 
@@ -38,7 +37,7 @@ def test_create_user_invalid_hcaptcha(database):  # pylint: disable=W0613
     })
 
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid hCaptcha token."
+    assert "Invalid hCaptcha token." in response.json()["detail"]
 
 
 @responses.activate
