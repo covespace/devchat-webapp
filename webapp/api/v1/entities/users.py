@@ -3,10 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from webapp.controller import create_user
+from webapp.controller import create_user, create_organization, add_user_to_organization
+from webapp.controller import create_access_key
 from webapp.controller.query import login_by_key, get_user_profile
 from webapp.controller.query import get_organizations_of_user, get_user_keys_in_organizations
 from webapp.dependencies import get_db
+from webapp.utils import send_email
 
 
 router = APIRouter()
@@ -26,10 +28,21 @@ class CreateUserResponse(BaseModel):
 async def create_user_endpoint(user: CreateUserRequest, db: Session = Depends(get_db)):
     try:
         user = create_user(db, user.username, user.email)
+        org = create_organization(db, user.username)
+        add_user_to_organization(db, user.id, org.id, 'owner')
+        key, value = create_access_key(db, user.id, org.id)
+        status = send_email(from_address="hello@devchat.ai", from_name="DevChat Team",
+                            to_address=key.user.email,
+                            template_id="d-052755df2d614200b2343aabe018bc22",
+                            template_data={"user_name": key.user.email, "access_key": value})
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    if status != 202:
+        raise HTTPException(status_code=status,
+                            detail=f"Failed to send email to {key.user.email}.")
 
     return CreateUserResponse(message="User created successfully.", user_id=user.id)
 
@@ -46,10 +59,9 @@ class LoginResponse(BaseModel):
 @router.post("/login", response_model=LoginResponse)
 async def login_endpoint(request: LoginRequest, db: Session = Depends(get_db)):
     user_id = login_by_key(db, request.key)
-    if user_id is not None:
-        return LoginResponse(message="Login successful", user_id=user_id)
-    else:
+    if user_id is None:
         raise HTTPException(status_code=401, detail="Invalid key hash")
+    return LoginResponse(message="Login successful", user_id=user_id)
 
 
 class UserProfileResponse(BaseModel):

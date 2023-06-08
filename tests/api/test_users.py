@@ -48,7 +48,7 @@ def test_get_user_profile_not_found(database):  # pylint: disable=W0613
 
 def test_login(database):
     user = create_user(database, username="testuser", email="testuser@example.com")
-    org = create_organization(database, name="Test-Org", country_code="US")
+    org = create_organization(database, name="Test-Org", country="US")
     add_user_to_organization(database, user.id, org.id)
 
     # Create an access key for the user
@@ -73,8 +73,8 @@ def test_get_user_organizations(database):
     user = create_user(database, username="testuser", email="testuser@example.com")
 
     # Create two test organizations
-    org1 = create_organization(database, name="Test-Org-1", country_code="US")
-    org2 = create_organization(database, name="Test-Org-2", country_code="US")
+    org1 = create_organization(database, name="Test-Org-1", country="US")
+    org2 = create_organization(database, name="Test-Org-2", country="US")
 
     # Add the user to both organizations
     add_user_to_organization(database, user.id, org1.id)
