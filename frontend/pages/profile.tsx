@@ -54,8 +54,8 @@ const Profile: React.FC = () => {
       <main className="relative w-full h-full sm:max-w-xl sm:mx-auto">
         <div className="relative px-8 py-16 bg-white shadow-lg sm:rounded-3xl sm:p-20 h-full">
           <div className="flex justify-between items-start">
-            <h1 className="text-2xl font-semibold mb-4">Welcome, {userName} ({userEmail})!</h1>
-            <button onClick={handleSignOut} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <h1 className="text-2xl font-semibold mb-4 profile-text-dark">Welcome, {userName} ({userEmail})!</h1>
+            <button onClick={handleSignOut} className="form-button">
               Sign Out
             </button>
           </div>

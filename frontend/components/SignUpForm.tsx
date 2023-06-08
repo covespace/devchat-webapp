@@ -45,10 +45,10 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         />
       </div>
       {signUpErrorMessage && (
-        <p className="text-red-500 text-xs italic mt-2">{signUpErrorMessage}</p>
+        <p className="text-red-500 text-xs italic mt-2 mb-2">{signUpErrorMessage}</p>
       )}
       {signUpSuccessMessage && (
-        <p className="text-green-500 text-xs italic mt-2">{signUpSuccessMessage}</p>
+        <p className="text-green-500 text-xs italic mt-2 mb-2">{signUpSuccessMessage}</p>
       )}
       <button className="form-button" type="submit">
         Sign Up
