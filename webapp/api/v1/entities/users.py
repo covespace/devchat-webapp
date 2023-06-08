@@ -9,9 +9,9 @@ from webapp.controller import create_access_key
 from webapp.controller.query import login_by_key, get_user_profile
 from webapp.controller.query import get_organizations_of_user, get_user_keys_in_organizations
 from webapp.dependencies import get_db
-from webapp.utils import send_email, verify_hcaptcha
+from webapp.utils import send_email, verify_hcaptcha, get_logger
 
-
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -30,6 +30,11 @@ class CreateUserResponse(BaseModel):
 async def create_user_endpoint(user_req: CreateUserRequest, db: Session = Depends(get_db)):
     if not verify_hcaptcha(user_req.token):
         raise HTTPException(status_code=401, detail="Invalid hCaptcha token.")
+    template_id = os.getenv("SENDGRID_TEMPLATE_ID")
+    if not template_id:
+        logger.error("SENDGRID_TEMPLATE_ID environment variable is not set")
+        raise HTTPException(status_code=500,
+                            detail="Internal server error. Please contact hello@devchat.ai.")
     try:
         user = create_user(db, user_req.username, user_req.email)
         org = create_organization(db, user.username)
@@ -37,7 +42,7 @@ async def create_user_endpoint(user_req: CreateUserRequest, db: Session = Depend
         _, value = create_access_key(db, user.id, org.id)
         status = send_email(from_address="hello@devchat.ai", from_name="DevChat Team",
                             to_address=user.email,
-                            template_id=os.getenv("SENDGRID_TEMPLATE_ID"),
+                            template_id=template_id,
                             template_data={"user_name": user.username, "access_key": value})
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error

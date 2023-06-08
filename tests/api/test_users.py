@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+import responses
 from webapp.main import app
 from webapp.controller import create_access_key, create_user, create_organization
 from webapp.controller import add_user_to_organization
@@ -6,34 +7,91 @@ from webapp.controller import add_user_to_organization
 client = TestClient(app)
 
 
-def test_create_user(database):  # pylint: disable=W0613
+@responses.activate
+def test_create_user_success(database):  # pylint: disable=W0613
+    # Mock the HTTP response for the hCaptcha verification
+    responses.add(
+        responses.POST,
+        "https://hcaptcha.com/siteverify",
+        json={"success": True},
+        status=200
+    )
+
     response = client.post("/api/v1/users", json={
-        "username": "testuser",
-        "email": "testuser@example.com"
+        "username": "newuser",
+        "email": "test@merico.dev",
+        "token": "token"
     })
+
+    if response.status_code != 201:
+        print(response.json())
     assert response.status_code == 201
     assert response.json()["message"] == "User created successfully."
     assert isinstance(response.json()["user_id"], int)
 
 
-def test_create_user_invalid_email(database):  # pylint: disable=W0613
+def test_create_user_invalid_hcaptcha(database):  # pylint: disable=W0613
     response = client.post("/api/v1/users", json={
-        "username": "testuser",
-        "email": "invalid_email"
+        "username": "fakeuser",
+        "email": "fakeuser@example.com",
+        "token": "fake_token"
     })
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid hCaptcha token."
+
+
+@responses.activate
+def test_create_user_existing_username(database):
+    # Create a user with the same username
+    create_user(database, username="existinguser", email="existinguser@example.com")
+
+    # Mock the HTTP response for the hCaptcha verification
+    responses.add(
+        responses.POST,
+        "https://hcaptcha.com/siteverify",
+        json={"success": True},
+        status=200
+    )
+
+    response = client.post("/api/v1/users", json={
+        "username": "existinguser",
+        "email": "existinguser@example.com",
+        "token": "token"
+    })
+
     assert response.status_code == 422
-    assert response.json()["detail"] == "Invalid email provided."
+    assert response.json()["detail"] == "Username already exists."
+
+
+@responses.activate
+def test_create_user_existing_email(database):
+    # Create a user with the same email
+    create_user(database, username="existinguser", email="existingemail@example.com")
+
+    # Mock the HTTP response for the hCaptcha verification
+    responses.add(
+        responses.POST,
+        "https://hcaptcha.com/siteverify",
+        json={"success": True},
+        status=200
+    )
+
+    response = client.post("/api/v1/users", json={
+        "username": "newuser",
+        "email": "existingemail@example.com",
+        "token": "token"
+    })
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Email already exists."
 
 
 def test_get_user_profile(database):  # pylint: disable=W0613
     # Create a test user
-    user_response = client.post("/api/v1/users", json={
-        "username": "testuser",
-        "email": "testuser@example.com"
-    })
-    user_id = user_response.json()["user_id"]
+    user = create_user(database, username="testuser", email="testuser@example.com")
 
-    response = client.get(f"/api/v1/users/{user_id}/profile")
+    response = client.get(f"/api/v1/users/{user.id}/profile")
     assert response.status_code == 200
     assert response.json()["username"] == "testuser"
     assert response.json()["email"] == "testuser@example.com"
@@ -58,14 +116,14 @@ def test_login(database):
         "key": value
     })
     assert response.status_code == 200
-    assert response.json()["message"] == "Login successful"
+    assert response.json()["message"] == "Login successful."
     assert response.json()["user_id"] == user.id
 
     response = client.post("/api/v1/login", json={
         "key": value.replace('e', 'a')
     })
     assert response.status_code == 401
-    assert response.json()["detail"] == "Invalid key hash"
+    assert response.json()["detail"] == "Invalid key hash."
 
 
 def test_get_user_organizations(database):
