@@ -4,7 +4,7 @@ import { createUser } from '@/api/signUp';
 const useSignUp = () => {
   const [signUpErrorMessage, setSignUpErrorMessage] = useState('');
   const [signUpSuccessMessage, setSignUpSuccessMessage] = useState('');
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string>('');
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -16,6 +16,7 @@ const useSignUp = () => {
       setSignUpErrorMessage('');
       setSignUpSuccessMessage('Sign up successful! Check your email for the access key and sign in.');
     } catch (errorDetail) {
+      setSignUpSuccessMessage('');
       if (typeof errorDetail === 'string') {
         setSignUpErrorMessage(errorDetail);
       } else {

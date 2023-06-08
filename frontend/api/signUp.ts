@@ -5,7 +5,7 @@ interface CreateUserResponse {
   user_id: number;
 }
 
-export async function createUser(username: string, email: string, token: string | null): Promise<number | null> {
+export async function createUser(username: string, email: string, token: string): Promise<number> {
   try {
     const response = await apiClient.post<CreateUserResponse>('/api/v1/users', {
       username: username,
