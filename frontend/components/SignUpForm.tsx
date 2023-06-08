@@ -39,20 +39,11 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
         />
       </div>
       <div className="mb-4">
-        <label className="form-label" htmlFor="org-name">
-          Create Organization (Optional)
-        </label>
-        <input
-          className="form-input"
-          id="org-name"
-          type="text"
-          placeholder="Enter your organization name"
+        <HCaptcha
+          sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || ''}
+          onVerify={onCaptchaVerify}
         />
       </div>
-      <HCaptcha
-        sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITEKEY || ''}
-        onVerify={onCaptchaVerify}
-      />
       {signUpErrorMessage && (
         <p className="text-red-500 text-xs italic mt-2">{signUpErrorMessage}</p>
       )}

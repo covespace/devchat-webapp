@@ -10,8 +10,6 @@ const useSignUp = () => {
     event.preventDefault();
     const username = event.currentTarget.username.value;
     const email = event.currentTarget.email.value;
-    const orgName = event.currentTarget['org-name'].value || username;
-    const role = 'owner';
 
     try {
       const user_id = await createUser(username, email, captchaToken);
