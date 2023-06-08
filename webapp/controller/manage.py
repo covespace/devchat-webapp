@@ -54,20 +54,18 @@ def create_user(db: Session, username: str, email: str,
     Returns:
         User: The created user object
     """
-    user = User(db, username=username, email=email,
-                company=company, location=location, social_profile=social_profile)
-
     try:
-        db.add(user)
-        db.commit()
+        user = User(db, username=username, email=email,
+                    company=company, location=location, social_profile=social_profile)
         logger.info("Created user %d (username: %s)", user.id, user.username)
         return user
     except IntegrityError as error:
-        db.rollback()
-        raise ValueError("Username already exists.") from error
-    except Exception as exc:
-        db.rollback()
-        raise exc
+        error_message = str(error.orig)
+        if "email" in error_message:
+            raise ValueError("Email already exists.") from error
+        if "username" in error_message:
+            raise ValueError("Username already exists.") from error
+        raise error
 
 
 def add_user_to_organization(db: Session, user_id: int, organization_id: int,

@@ -70,7 +70,7 @@ def test_create_user_duplicate_username(database):
 
     create_user(database, username, email)
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match="Username already exists."):
         create_user(database, username, "anotheremail@example.com")
 
 
