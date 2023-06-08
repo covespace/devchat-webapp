@@ -24,19 +24,12 @@ def create_organization(db: Session, name: str, country: Optional[str] = None) -
     Returns:
         Organization: The created organization object
     """
-    organization = Organization(db, name=name, country_code=country)
-
     try:
-        db.add(organization)
-        db.commit()
+        organization = Organization(db, name=name, country_code=country)
         logger.info("Created organization %d (name: %s)", organization.id, organization.name)
         return organization
     except IntegrityError as error:
-        db.rollback()
         raise ValueError("Organization name already exists.") from error
-    except Exception as exc:
-        db.rollback()
-        raise exc
 
 
 def create_user(db: Session, username: str, email: str,
