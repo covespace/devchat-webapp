@@ -34,7 +34,7 @@ async def create_user_endpoint(user_req: CreateUserRequest, db: Session = Depend
     if not template_id:
         logger.error("SENDGRID_TEMPLATE_ID environment variable is not set")
         raise HTTPException(status_code=500,
-                            detail="Internal server error. Please contact hello@devchat.ai.")
+                            detail="Email server error. Please contact hello@devchat.ai.")
     try:
         user = create_user(db, user_req.username, user_req.email)
         org = create_organization(db, user.username)
@@ -47,11 +47,11 @@ async def create_user_endpoint(user_req: CreateUserRequest, db: Session = Depend
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        logger.exception("Unknown error creating user %s: %s", user_req.username, str(exc))
+        raise HTTPException(status_code=500, detail="Unknown server error.") from exc
 
     if status != 202:
-        raise HTTPException(status_code=status,
-                            detail=f"Failed to send email to {user.email}.")
+        raise HTTPException(status_code=status, detail="Failed to send email.")
 
     return CreateUserResponse(message="User created successfully.", user_id=user.id)
 
@@ -67,7 +67,11 @@ class LoginResponse(BaseModel):
 
 @router.post("/login", response_model=LoginResponse)
 async def login_endpoint(request: LoginRequest, db: Session = Depends(get_db)):
-    user_id = login_by_key(db, request.key)
+    try:
+        user_id = login_by_key(db, request.key)
+    except Exception as exc:
+        logger.exception("Unknown login error: %s", str(exc))
+        raise HTTPException(status_code=500, detail="Unknown server error.") from exc
     if user_id is None:
         raise HTTPException(status_code=401, detail="Invalid key hash.")
     return LoginResponse(message="Login successful.", user_id=user_id)
@@ -80,7 +84,11 @@ class UserProfileResponse(BaseModel):
 
 @router.get("/users/{user_id}/profile", response_model=UserProfileResponse)
 async def get_user_profile_endpoint(user_id: int, db: Session = Depends(get_db)):
-    user_profile = get_user_profile(db, user_id)
+    try:
+        user_profile = get_user_profile(db, user_id)
+    except Exception as exc:
+        logger.exception("Unknown error getting profile of user %d: %s", user_id, str(exc))
+        raise HTTPException(status_code=500, detail="Unknown server error.") from exc
     if user_profile is None:
         raise HTTPException(status_code=404, detail="User not found.")
     return UserProfileResponse(**user_profile)
@@ -95,13 +103,17 @@ class OrganizationResponse(BaseModel):
 
 @router.get("/users/{user_id}/organizations", response_model=list[OrganizationResponse])
 async def get_user_organizations_endpoint(user_id: int, db: Session = Depends(get_db)):
-    organizations = get_organizations_of_user(db, user_id)
-    org_ids = [org["id"] for org in organizations]
-    org_keys = get_user_keys_in_organizations(db, user_id, org_ids)
+    try:
+        organizations = get_organizations_of_user(db, user_id)
+        org_ids = [org["id"] for org in organizations]
+        org_keys = get_user_keys_in_organizations(db, user_id, org_ids)
 
-    for org in organizations:
-        org["org_id"] = org.pop("id")
-        org["org_name"] = org.pop("name")
-        org["keys"] = org_keys.get(org["org_id"], [])
+        for org in organizations:
+            org["org_id"] = org.pop("id")
+            org["org_name"] = org.pop("name")
+            org["keys"] = org_keys.get(org["org_id"], [])
+    except Exception as exc:
+        logger.exception("Unknown error getting organizations of user %d: %s", user_id, str(exc))
+        raise HTTPException(status_code=500, detail="Unknown server error.") from exc
 
     return [OrganizationResponse(**org) for org in organizations]

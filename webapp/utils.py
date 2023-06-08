@@ -21,6 +21,11 @@ from sendgrid.helpers.mail import Mail, Email, To
 def get_logger(name: str = None) -> logging.Logger:
     local_logger = logging.getLogger(name)
 
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    local_logger.addHandler(handler)
+
     # Default to 'INFO' if 'LOG_LEVEL' env var is not set
     log_level_str = os.getenv('LOG_LEVEL')
     if not log_level_str:
@@ -29,17 +34,6 @@ def get_logger(name: str = None) -> logging.Logger:
         log_level = getattr(logging, log_level_str.upper(), logging.INFO)
 
     local_logger.setLevel(log_level)
-
-    # Create console handler with a higher log level
-    handler = logging.StreamHandler()
-    handler.setLevel(log_level)
-
-    # Create formatter and add it to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-
-    # Add the handlers to the logger
-    local_logger.addHandler(handler)
 
     local_logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
     return local_logger
@@ -146,8 +140,7 @@ def verify_hcaptcha(token: str) -> bool:
     Verify the hCaptcha token.
 
     :param token: The hCaptcha token to verify.
-    :return: A tuple containing a boolean indicating whether the token is valid and
-        a string with the error message if any.
+    :return: True if the token is valid, False otherwise.
     """
     url = "https://hcaptcha.com/siteverify"
     secret_key = os.getenv('HCAPTCHA_SECRET_KEY')

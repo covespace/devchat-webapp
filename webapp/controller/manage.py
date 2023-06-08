@@ -74,32 +74,32 @@ def add_user_to_organization(db: Session, user_id: int, organization_id: int,
     Returns:
         bool: True if the user was added successfully, False otherwise
     """
-    stmt = insert(organization_user).values(
-        organization_id=organization_id,
-        user_id=user_id,
-        role=Role[role.upper()]
-    )
     try:
+        stmt = insert(organization_user).values(
+            organization_id=organization_id,
+            user_id=user_id,
+            role=Role[role.upper()]
+        )
         db.execute(stmt)
         db.commit()
         logger.info("Added user %d to organization %d", user_id, organization_id)
         return True
     except IntegrityError as error:
         db.rollback()
-        raise ValueError("User/organization not found or duplicate addition.") from error
+        raise ValueError("Accounts not found or duplicate.") from error
     except Exception as exc:
         db.rollback()
         raise exc
 
 
 def assign_role_to_user(db: Session, user_id: int, org_id: int, role: Role):
-    db.execute(
-        organization_user.update()
-        .where(organization_user.c.user_id == user_id)
-        .where(organization_user.c.organization_id == org_id)
-        .values(role=role)
-    )
     try:
+        db.execute(
+            organization_user.update()
+            .where(organization_user.c.user_id == user_id)
+            .where(organization_user.c.organization_id == org_id)
+            .values(role=role)
+        )
         db.commit()
         logger.info("Assigned role %s to user %d in organization %d", role, user_id, org_id)
         return True
@@ -155,8 +155,8 @@ def revoke_access_key(db: Session, key_id: int):
     key = db.query(AccessKey).filter(AccessKey.id == key_id).first()
 
     if key:
-        key.revoke_time = now(db)
         try:
+            key.revoke_time = now(db)
             db.commit()
             logger.info("Revoked access key %d (hash: %s) for user %d in organization %d",
                         key.id, key.key_hash, key.user_id, key.organization_id)
