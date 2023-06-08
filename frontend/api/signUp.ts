@@ -1,63 +1,20 @@
 import apiClient from '@/api/client';
 
-interface CreateOrganizationResponse {
-  org_id: number;
-}
-
 interface CreateUserResponse {
   user_id: number;
 }
 
-export async function createOrganization(orgName: string, captchaToken: string | null): Promise<number | null> {
-  try {
-    const response = await apiClient.post<CreateOrganizationResponse>('/api/v1/organizations', {
-      name: orgName,
-      token: captchaToken,
-    });
-
-    return response.data.org_id;
-  } catch (error) {
-    console.error('Failed to create organization:', error);
-    return null;
-  }
-}
-
-export async function createUser(username: string, email: string, captchaToken: string | null): Promise<number | null> {
+export async function createUser(username: string, email: string, token: string | null): Promise<number | null> {
   try {
     const response = await apiClient.post<CreateUserResponse>('/api/v1/users', {
       username: username,
       email: email,
-      token: captchaToken,
+      token: token,
     });
 
     return response.data.user_id;
   } catch (error) {
     console.error('Failed to create user:', error);
-    return null;
-  }
-}
-
-export async function addUserToOrganization(org_id: number, user_id: number, role: string): Promise<boolean> {
-  try {
-    await apiClient.post(`/api/v1/organizations/${org_id}/users`, {
-      user_id: user_id,
-      role: role,
-    });
-
-    return true;
-  } catch (error) {
-    console.error('Failed to add user to organization:', error);
-    return false;
-  }
-}
-
-export async function issueAccessKey(org_id: number, user_id: number): Promise<boolean> {
-  try {
-    await apiClient.post(`/api/v1/organizations/${org_id}/user/${user_id}/access_key`);
-
-    return true;
-  } catch (error) {
-    console.error('Failed to issue access key:', error);
-    return false;
+    throw error.response.data.detail;
   }
 }
