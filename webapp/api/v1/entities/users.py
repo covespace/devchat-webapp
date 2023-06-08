@@ -22,7 +22,6 @@ class CreateUserRequest(BaseModel):
 
 
 class CreateUserResponse(BaseModel):
-    message: str
     user_id: int
 
 
@@ -53,7 +52,7 @@ async def create_user_endpoint(user_req: CreateUserRequest, db: Session = Depend
     if status != 202:
         raise HTTPException(status_code=status, detail="Failed to send email.")
 
-    return CreateUserResponse(message="User created successfully.", user_id=user.id)
+    return CreateUserResponse(user_id=user.id)
 
 
 class LoginRequest(BaseModel):
