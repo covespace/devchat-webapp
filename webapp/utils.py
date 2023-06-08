@@ -11,6 +11,7 @@ import time
 import uuid
 
 import jwt
+import requests
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from sendgrid import SendGridAPIClient
@@ -138,3 +139,30 @@ def _get_sendgrid_api_key() -> str:
     if sendgrid_api_key is None:
         raise ValueError("SENDGRID_API_KEY environment variable is not set")
     return sendgrid_api_key
+
+
+def verify_hcaptcha(token: str) -> bool:
+    """
+    Verify the hCaptcha token.
+
+    :param token: The hCaptcha token to verify.
+    :return: A tuple containing a boolean indicating whether the token is valid and
+        a string with the error message if any.
+    """
+    url = "https://hcaptcha.com/siteverify"
+    secret_key = os.getenv('HCAPTCHA_SECRET_KEY')
+    if secret_key is None:
+        raise ValueError("HCAPTCHA_SECRET_KEY environment variable is not set")
+    payload = {
+        "response": token,
+        "secret": secret_key
+    }
+
+    response = requests.post(url, data=payload, timeout=10)
+    result = response.json()
+
+    if not result.get("success"):
+        error_msg = ", ".join(result.get("error-codes", []))
+        logger.info("hCaptcha verification failed: %s", error_msg)
+        return False
+    return True
