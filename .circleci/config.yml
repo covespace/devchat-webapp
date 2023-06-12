@@ -1,5 +1,8 @@
 version: 2.1
 
+orbs:
+  aws-ecr: circleci/aws-ecr@8.2.1
+
 jobs:
   build:
     docker:
@@ -44,7 +47,30 @@ jobs:
               echo "No changes in webapp, skipping pytest for webapp"
             fi
 
+  build-and-push-image:
+    executor: aws-ecr/default
+    steps:
+      - checkout
+      - setup_remote_docker
+      - aws-ecr/build-and-push-image:
+          aws-access-key-id: AWS_ACCESS_KEY_ID
+          aws-secret-access-key: AWS_SECRET_ACCESS_KEY
+          region: AWS_REGION
+          registry-id: AWS_ACCOUNT_ID
+          repo: REPO_NAME
+          dockerfile: Dockerfile
+          path: .
+          tag: ${CIRCLE_TAG:-latest}  # use the CIRCLE_TAG for the Docker image tag, or 'latest' if it does not exist
+
 workflows:
   build_and_test:
     jobs:
       - build
+      - build-and-push-image:
+          requires:
+            - build
+          filters:
+            branches:
+              only: main  # run this job for updates on main branch
+            tags:
+              only: /^v.*/  # run this job for tags that start with 'v'
