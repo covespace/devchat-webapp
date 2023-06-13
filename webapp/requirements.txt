@@ -4,3 +4,4 @@ pydantic~=1.10.7
 PyJWT~=2.7.0
 sendgrid~=6.10.0
 SQLAlchemy~=2.0.12
+requests~=2.30.0
