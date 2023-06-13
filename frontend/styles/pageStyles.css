@@ -15,4 +15,9 @@
   .card {
     @apply bg-gray-600;
   }
+
+  /* Add dark mode styles for the profile page */
+  .profile-text-dark {
+    @apply text-gray-600;
+  }
 }

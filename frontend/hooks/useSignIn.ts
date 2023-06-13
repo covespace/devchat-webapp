@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { isAxiosError } from 'axios';
-import apiClient from '../api/apiClient';
+import apiClient from '@/api/client';
 
 const useSignIn = () => {
   const [accessKey, setAccessKey] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [signInErrorMessage, setErrorMessage] = useState('');
   const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await apiClient.post('/api/v1/login', { key: accessKey });
+      const response = await apiClient.post('/api/v1/login', {
+        key: accessKey
+      });
       const { user_id } = response.data;
       localStorage.setItem('user_id', user_id.toString());
       router.push('/profile');
@@ -25,7 +27,7 @@ const useSignIn = () => {
     }
   };
 
-  return { accessKey, setAccessKey, errorMessage, handleSignIn };
+  return { accessKey, setAccessKey, signInErrorMessage, handleSignIn };
 };
 
 export default useSignIn;

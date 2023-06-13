@@ -1,7 +1,6 @@
 """
 utils.py contains utility functions that are used throughout the webapp.
 """
-import json
 from datetime import datetime
 import hashlib
 import logging
@@ -9,11 +8,10 @@ import os
 import random
 import re
 import time
-from typing import Dict
 import uuid
 
-import boto3
 import jwt
+import requests
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import func
 from sendgrid import SendGridAPIClient
@@ -23,6 +21,11 @@ from sendgrid.helpers.mail import Mail, Email, To
 def get_logger(name: str = None) -> logging.Logger:
     local_logger = logging.getLogger(name)
 
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    local_logger.addHandler(handler)
+
     # Default to 'INFO' if 'LOG_LEVEL' env var is not set
     log_level_str = os.getenv('LOG_LEVEL')
     if not log_level_str:
@@ -31,17 +34,6 @@ def get_logger(name: str = None) -> logging.Logger:
         log_level = getattr(logging, log_level_str.upper(), logging.INFO)
 
     local_logger.setLevel(log_level)
-
-    # Create console handler with a higher log level
-    handler = logging.StreamHandler()
-    handler.setLevel(log_level)
-
-    # Create formatter and add it to the handlers
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-
-    # Add the handlers to the logger
-    local_logger.addHandler(handler)
 
     local_logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
     return local_logger
@@ -130,37 +122,40 @@ def send_email(from_address: str, from_name: str, to_address: str,
 
 
 def _get_jwt_secret_key() -> str:
-    if 'JWT_SECRET_KEY' in os.environ:
-        return os.environ['JWT_SECRET_KEY']
-    return get_secrets_from_aws('JWT')['SECRET_KEY']
+    secret_key = os.getenv('JWT_SECRET_KEY')
+    if secret_key is None:
+        raise ValueError("JWT_SECRET_KEY environment variable is not set")
+    return secret_key
 
 
 def _get_sendgrid_api_key() -> str:
-    if 'SENDGRID_API_KEY' in os.environ:
-        return os.environ['SENDGRID_API_KEY']
-    return get_secrets_from_aws('SENDGRID')['API_KEY']
+    sendgrid_api_key = os.getenv('SENDGRID_API_KEY')
+    if sendgrid_api_key is None:
+        raise ValueError("SENDGRID_API_KEY environment variable is not set")
+    return sendgrid_api_key
 
 
-def get_secrets_from_aws(secret_id: str) -> Dict[str, str]:
+def verify_hcaptcha(token: str) -> bool:
     """
-    Get a secret dictionary from AWS Secrets Manager.
+    Verify the hCaptcha token.
+
+    :param token: The hCaptcha token to verify.
+    :return: True if the token is valid, False otherwise.
     """
-    try:
-        region_name = "ap-southeast-1"
-        # Create a Secrets Manager client
-        session = boto3.session.Session()
-        client = session.client(
-            service_name='secretsmanager',
-            region_name=region_name
-        )
+    url = "https://hcaptcha.com/siteverify"
+    secret_key = os.getenv('HCAPTCHA_SECRET_KEY')
+    if secret_key is None:
+        raise ValueError("HCAPTCHA_SECRET_KEY environment variable is not set")
+    payload = {
+        "response": token,
+        "secret": secret_key
+    }
 
-        get_secret_value_response = client.get_secret_value(
-            SecretId=secret_id
-        )
-    except Exception as exc:
-        # Raise an exception if unable to get the secret
-        raise ValueError(f"Unable to get {secret_id} from AWS Secrets Manager") from exc
+    response = requests.post(url, data=payload, timeout=10)
+    result = response.json()
 
-    # Decrypts secret using the associated KMS key.
-    # Assuming the secret is a string, we parse it as a JSON object
-    return json.loads(get_secret_value_response['SecretString'])
+    if not result.get("success"):
+        error_msg = ", ".join(result.get("error-codes", []))
+        logger.info("hCaptcha verification failed: %s", error_msg)
+        return False
+    return True

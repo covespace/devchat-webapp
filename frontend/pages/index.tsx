@@ -1,16 +1,15 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
-import SignInForm from '../components/SignInForm';
-import SignUpForm from '../components/SignUpForm';
-import useSignIn from '../hooks/useSignIn';
+import SignInForm from '@/components/SignInForm';
+import SignUpForm from '@/components/SignUpForm';
+import useSignIn from '@/hooks/useSignIn';
 import useSignUp from '@/hooks/useSignUp';
-import '@/styles/pageStyles.css';
 
 const Home: React.FC = () => {
   const [activeTab, setActiveTab] = useState('signin');
-  const { accessKey, setAccessKey, errorMessage, handleSignIn } = useSignIn();
-  const { signUpErrorMessage, signUpSuccessMessage, handleSignUp } = useSignUp();
+  const { accessKey, setAccessKey, signInErrorMessage, handleSignIn } = useSignIn();
+  const { signUpErrorMessage, signUpSuccessMessage, handleSignUp, handleSignUpCaptcha } = useSignUp();
 
   return (
     <div className="container">
@@ -44,7 +43,7 @@ const Home: React.FC = () => {
           {activeTab === 'signin' && (
             <SignInForm
               accessKey={accessKey}
-              errorMessage={errorMessage}
+              errorMessage={signInErrorMessage}
               onAccessKeyChange={setAccessKey}
               onSubmit={handleSignIn}
             />
@@ -55,6 +54,7 @@ const Home: React.FC = () => {
               onSubmit={handleSignUp}
               signUpErrorMessage={signUpErrorMessage}
               signUpSuccessMessage={signUpSuccessMessage}
+              onCaptchaVerify={handleSignUpCaptcha}
             />
           )}
         </div>

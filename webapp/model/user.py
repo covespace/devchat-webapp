@@ -27,7 +27,7 @@ class User(Base):
 
     id = Column(BigInteger, primary_key=True, unique=True)
     username = Column(String, unique=True, nullable=False)
-    email = Column(String, nullable=False)
+    email = Column(String, unique=True, nullable=False)
     company = Column(String, nullable=True)
     location = Column(String, nullable=True)
     social_profile = Column(String, nullable=True)

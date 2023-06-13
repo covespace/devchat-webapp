@@ -1,7 +1,7 @@
-boto3~=1.26.134
 fastapi~=0.95.2
 psycopg2-binary~=2.9.6
 pydantic~=1.10.7
 PyJWT~=2.7.0
+requests~=2.30.0
 sendgrid~=6.10.0
 SQLAlchemy~=2.0.12

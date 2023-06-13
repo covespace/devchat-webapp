@@ -1,5 +1,4 @@
 import React from 'react';
-import '@/styles/formStyles.css';
 
 interface SignInFormProps {
   accessKey: string;
@@ -12,7 +11,7 @@ const SignInForm: React.FC<SignInFormProps> = ({
   accessKey,
   errorMessage,
   onAccessKeyChange,
-  onSubmit,
+  onSubmit
 }) => {
   return (
     <form onSubmit={onSubmit} className="form-bg-dark">

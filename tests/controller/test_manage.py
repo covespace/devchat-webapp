@@ -35,7 +35,7 @@ def test_create_organization_duplicate_name(database):
     country_code = "US"
     create_organization(database, name, country_code)
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match="Organization name already exists."):
         create_organization(database, name, country_code)
 
 
@@ -70,7 +70,7 @@ def test_create_user_duplicate_username(database):
 
     create_user(database, username, email)
 
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError, match="Username already exists."):
         create_user(database, username, "anotheremail@example.com")
 
 
