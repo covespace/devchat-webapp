@@ -1,5 +1,6 @@
 import React from 'react';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
+import Link from 'next/link';
 
 interface SignUpFormProps {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
@@ -50,6 +51,16 @@ const SignUpForm: React.FC<SignUpFormProps> = ({
       {signUpSuccessMessage && (
         <p className="text-green-500 text-xs italic mt-2 mb-2">{signUpSuccessMessage}</p>
       )}
+      <p className="text-xs mb-2">
+        By clicking Sign Up, you agree to our{' '}
+        <Link href="/terms">
+          <span className="text-blue-500">Terms</span>
+        </Link>{' '}
+        and{' '}
+        <Link href="https://meri.co/privacy">
+          <span className="text-blue-500">Privacy Policy</span>
+        </Link>.
+      </p>
       <button className="form-button" type="submit">
         Sign Up
       </button>
