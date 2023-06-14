@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
     <footer className="footer">
       <div className="container">
         <div className="footer-items">
-          <p>&copy; {new Date().getFullYear()} DevChat</p>
+          <p>&copy; {new Date().getFullYear()} Merico, Inc.</p>
           <a href="https://github.com/devchat" target="_blank" rel="noopener noreferrer">
             <FaGithub size={24} className="github-icon" />
           </a>

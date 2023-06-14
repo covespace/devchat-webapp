@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import fs from 'fs';
 import path from 'path';
 import Footer from '@/components/Footer';
+import 'github-markdown-css/github-markdown.css';
 
 interface TermsProps {
   content: string;
@@ -10,9 +11,15 @@ interface TermsProps {
 
 const Terms: React.FC<TermsProps> = ({ content }) => {
   return (
-    <div className="container">
-      <ReactMarkdown>{content}</ReactMarkdown>
-      <Footer />
+    <div className="main">
+      <div className="container markdown-body">
+        <div className="markdown-content-container">
+          <ReactMarkdown>{content}</ReactMarkdown>
+        </div>
+      </div>
+      <footer className="footer">
+        <Footer />
+      </footer>
     </div>
   );
 };
