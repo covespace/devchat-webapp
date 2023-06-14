@@ -10,14 +10,38 @@
   @apply bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col;
 }
 
+.footer {
+  @apply bg-gray-100 py-4 w-full;
+}
+
+.footer-items {
+  @apply flex items-center justify-center space-x-8;
+}
+
+.github-icon {
+  @apply text-gray-600 hover:text-blue-500;
+}
+
+.footer-link {
+  @apply text-gray-600 hover:text-blue-500;
+}
+
 /* Dark mode styles */
 @media (prefers-color-scheme: dark) {
   .card {
     @apply bg-gray-600;
   }
 
-  /* Add dark mode styles for the profile page */
   .profile-text-dark {
     @apply text-gray-600;
+  }
+
+  .footer {
+    @apply bg-gray-800;
+  }
+
+  .footer-link,
+  .github-icon {
+    @apply text-gray-300 hover:text-blue-400;
   }
 }

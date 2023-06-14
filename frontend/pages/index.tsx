@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import Image from 'next/image';
+import Footer from '@/components/Footer';
 import SignInForm from '@/components/SignInForm';
 import SignUpForm from '@/components/SignUpForm';
 import useSignIn from '@/hooks/useSignIn';
@@ -12,13 +13,12 @@ const Home: React.FC = () => {
   const { signUpErrorMessage, signUpSuccessMessage, handleSignUp, handleSignUpCaptcha } = useSignUp();
 
   return (
-    <div className="container">
+    <div>
       <Head>
-        <title>Sign In & Sign Up</title>
+        <title>DevChat Sign In & Sign Up</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main className="main">
+      <main className="container main">
         <Image src="/devchat.png" alt="Logo" width={120} height={120} style={{ marginBottom: '2rem' }} />
         <h1 className="text-4xl font-bold mb-8">Welcome to DevChat!</h1>
 
@@ -59,6 +59,9 @@ const Home: React.FC = () => {
           )}
         </div>
       </main>
+      <footer className="footer">
+        <Footer />
+      </footer>
     </div>
   );
 };
