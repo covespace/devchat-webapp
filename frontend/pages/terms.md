@@ -2,7 +2,7 @@
 
 Last Modified: June 12, 2023
 
-These Product Specific Terms for Merico DevChat, together with the Merico [Terms and Conditions](https://www.merico.dev/terms-conditions) and the Merico [Privacy Policy](https://www.merico.dev/privacy-agreement/merico-inc-privacy-policy), form your agreement with us. The combined document is referred to as the "Agreement." By using Merico DevChat, you agree to the general terms, unless you have a separate Agreement with Merico. Merico reserves the right to modify these Terms and may provide notice of these changes as described in Terms and Conditions. Terms not defined here are given their respective meanings in the Agreement.
+These Product Specific Terms for Merico DevChat, together with the Merico [Terms and Conditions](https://meri.co/terms) and the Merico [Privacy Policy](https://meri.co/privacy), form your agreement with us. The combined document is referred to as the "Agreement." By using Merico DevChat, you agree to the general terms, unless you have a separate Agreement with Merico. Merico reserves the right to modify these Terms and may provide notice of these changes as described in Terms and Conditions. Terms not defined here are given their respective meanings in the Agreement.
 
 ## 1. Merico DevChat Use
 

@@ -8,13 +8,13 @@ const Footer: React.FC = () => {
       <div className="container">
         <div className="footer-items">
           <p>&copy; {new Date().getFullYear()} Merico, Inc.</p>
-          <a href="https://github.com/devchat" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/devchat-ai" target="_blank" rel="noopener noreferrer">
             <FaGithub size={24} className="github-icon" />
           </a>
           <Link href="/terms">
             <span className="footer-link cursor-pointer">Terms</span>
           </Link>
-          <Link href="/privacy">
+          <Link href="https://meri.co/privacy">
             <span className="footer-link cursor-pointer">Privacy</span>
           </Link>
         </div>

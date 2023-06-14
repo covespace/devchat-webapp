@@ -12,9 +12,11 @@ interface TermsProps {
 const Terms: React.FC<TermsProps> = ({ content }) => {
   return (
     <div className="main">
-      <div className="container markdown-body">
-        <div className="markdown-content-container">
-          <ReactMarkdown>{content}</ReactMarkdown>
+      <div className="container">
+        <div className="markdown-body">
+          <div className="markdown-content-container">
+            <ReactMarkdown>{content}</ReactMarkdown>
+          </div>
         </div>
       </div>
       <footer className="footer">
