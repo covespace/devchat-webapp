@@ -4,7 +4,7 @@ orbs:
   aws-ecr: circleci/aws-ecr@8.2.1
 
 jobs:
-  build:
+  build-and-test:
     docker:
       - image: cimg/python:3.11
         environment:
@@ -51,24 +51,23 @@ jobs:
     executor: aws-ecr/default
     steps:
       - checkout
-      - setup_remote_docker
       - aws-ecr/build-and-push-image:
           aws-access-key-id: AWS_ACCESS_KEY_ID
           aws-secret-access-key: AWS_SECRET_ACCESS_KEY
-          region: AWS_REGION
+          region: ${AWS_REGION}
           registry-id: AWS_ACCOUNT_ID
-          repo: REPO_NAME
+          repo: ${REPO_NAME}
           dockerfile: Dockerfile
           path: .
           tag: ${CIRCLE_TAG:-latest}  # use the CIRCLE_TAG for the Docker image tag, or 'latest' if it does not exist
 
 workflows:
-  build_and_test:
+  build_and_test_and_push_image:
     jobs:
-      - build
+      - build-and-test
       - build-and-push-image:
           requires:
-            - build
+            - build-and-test
           filters:
             branches:
               only: main  # run this job for updates on main branch
