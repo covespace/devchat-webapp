@@ -18,22 +18,28 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail, Email, To
 
 
-def get_logger(name: str = None) -> logging.Logger:
+def get_logger(name: str = None, handler: logging.Handler = None) -> logging.Logger:
     local_logger = logging.getLogger(name)
 
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    local_logger.addHandler(handler)
-
     # Default to 'INFO' if 'LOG_LEVEL' env var is not set
-    log_level_str = os.getenv('LOG_LEVEL')
-    if not log_level_str:
-        log_level = logging.INFO
-    else:
-        log_level = getattr(logging, log_level_str.upper(), logging.INFO)
-
+    log_level_str = os.getenv('LOG_LEVEL', 'INFO')
+    log_level = getattr(logging, log_level_str.upper(), logging.INFO)
     local_logger.setLevel(log_level)
+
+    # If a handler is provided, configure and add it to the logger
+    if handler is not None:
+        handler.setLevel(log_level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        local_logger.addHandler(handler)
+
+    # If no handler is provided and the logger has no handlers, add a default StreamHandler
+    elif not local_logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setLevel(log_level)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        handler.setFormatter(formatter)
+        local_logger.addHandler(handler)
 
     local_logger.info("Log level set to %s (env: %s)", log_level, log_level_str)
     return local_logger

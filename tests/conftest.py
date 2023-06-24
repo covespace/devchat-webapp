@@ -6,7 +6,7 @@ from dotenv import load_dotenv, find_dotenv
 import pytest
 from webapp.model import Database, Base
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 
 @pytest.fixture(scope="function", name="database")
